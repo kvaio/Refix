@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgis/postgis:17-3.5
+    container_name: refix_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: refix
+      POSTGRES_PASSWORD: refix_password
+      POSTGRES_DB: refix
+    ports:
+      - "5432:5432"
+    volumes:
+      - refix_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  refix_postgres_data:
