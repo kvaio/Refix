@@ -3,7 +3,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-interface Technician {
+export interface Technician {
   id: string;
   name: string;
   specialty: string;

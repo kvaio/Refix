@@ -6,7 +6,9 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Request } from 'express';
 
@@ -25,6 +27,13 @@ export class UsersController {
   @Get('me')
   @ApiOperation({
     summary: 'Obtener el usuario autenticado',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Datos del usuario autenticado',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'JWT inválido o ausente',
   })
   getMe(@Req() req: AuthenticatedRequest) {
     return {

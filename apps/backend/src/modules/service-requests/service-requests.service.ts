@@ -1,11 +1,14 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+
 import {
   CreateServiceRequestDto,
 } from './dto/create-service-request.dto';
+
 import {
   ServiceRequestStatus,
   UpdateServiceRequestStatusDto,
@@ -17,7 +20,7 @@ interface AuthUser {
   role: string;
 }
 
-interface ServiceRequest {
+export interface ServiceRequest {
   id: string;
   clientId: string;
   technicianId: string | null;
@@ -76,15 +79,7 @@ export class ServiceRequestsService {
   }
 
   findOne(id: string, user: AuthUser) {
-    const request = this.requests.find(
-      (item) => item.id === id,
-    );
-
-    if (!request) {
-      throw new NotFoundException(
-        'Solicitud de servicio no encontrada',
-      );
-    }
+    const request = this.findRequest(id);
 
     const canAccess =
       user.role === 'ADMIN' ||
@@ -103,6 +98,18 @@ export class ServiceRequestsService {
   accept(id: string, user: AuthUser) {
     const request = this.findRequest(id);
 
+    if (request.status !== ServiceRequestStatus.PENDING) {
+      throw new BadRequestException(
+        'Solo una solicitud pendiente puede ser aceptada',
+      );
+    }
+
+    if (request.technicianId !== null) {
+      throw new BadRequestException(
+        'La solicitud ya tiene un técnico asignado',
+      );
+    }
+
     request.technicianId = user.id;
     request.status = ServiceRequestStatus.ACCEPTED;
     request.updatedAt = new Date().toISOString();
@@ -112,6 +119,12 @@ export class ServiceRequestsService {
 
   reject(id: string) {
     const request = this.findRequest(id);
+
+    if (request.status !== ServiceRequestStatus.PENDING) {
+      throw new BadRequestException(
+        'Solo una solicitud pendiente puede ser rechazada',
+      );
+    }
 
     request.status = ServiceRequestStatus.REJECTED;
     request.updatedAt = new Date().toISOString();
@@ -126,19 +139,59 @@ export class ServiceRequestsService {
   ) {
     const request = this.findRequest(id);
 
-    if (
-      request.technicianId !== user.id &&
-      user.role !== 'ADMIN'
-    ) {
+    const isOwner =
+      request.technicianId === user.id;
+
+    const isAdmin =
+      user.role === 'ADMIN';
+
+    if (!isOwner && !isAdmin) {
       throw new ForbiddenException(
         'No puedes modificar esta solicitud',
       );
     }
 
+    this.validateStatusTransition(
+      request.status,
+      dto.status,
+    );
+
     request.status = dto.status;
     request.updatedAt = new Date().toISOString();
 
     return request;
+  }
+
+  private validateStatusTransition(
+    currentStatus: ServiceRequestStatus,
+    nextStatus: ServiceRequestStatus,
+  ) {
+    const allowedTransitions: Record<
+      ServiceRequestStatus,
+      ServiceRequestStatus[]
+    > = {
+      [ServiceRequestStatus.PENDING]: [
+        ServiceRequestStatus.REJECTED,
+      ],
+      [ServiceRequestStatus.ACCEPTED]: [
+        ServiceRequestStatus.IN_PROGRESS,
+      ],
+      [ServiceRequestStatus.IN_PROGRESS]: [
+        ServiceRequestStatus.COMPLETED,
+      ],
+      [ServiceRequestStatus.COMPLETED]: [],
+      [ServiceRequestStatus.REJECTED]: [],
+      [ServiceRequestStatus.CANCELLED]: [],
+    };
+
+    const allowed =
+      allowedTransitions[currentStatus];
+
+    if (!allowed.includes(nextStatus)) {
+      throw new BadRequestException(
+        `Transición de estado no permitida: ${currentStatus} → ${nextStatus}`,
+      );
+    }
   }
 
   private findRequest(id: string) {

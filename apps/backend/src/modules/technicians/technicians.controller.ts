@@ -5,11 +5,14 @@ import {
   Query,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiParam,
-  ApiQuery,
+  ApiResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 import { NearbyTechniciansDto } from './dto/nearby-technicians.dto';
@@ -27,6 +30,13 @@ export class TechniciansController {
   @ApiOperation({
     summary: 'Obtener técnicos',
   })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de técnicos',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'JWT inválido o ausente',
+  })
   findAll() {
     return this.techniciansService.findAll();
   }
@@ -34,6 +44,16 @@ export class TechniciansController {
   @Get('nearby')
   @ApiOperation({
     summary: 'Buscar técnicos cercanos',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Técnicos cercanos ordenados por distancia',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'JWT inválido o ausente',
+  })
+  @ApiBadRequestResponse({
+    description: 'Coordenadas o radio inválidos',
   })
   findNearby(
     @Query() query: NearbyTechniciansDto,
@@ -52,6 +72,16 @@ export class TechniciansController {
   @ApiParam({
     name: 'id',
     example: 'tech-001',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Técnico encontrado',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'JWT inválido o ausente',
+  })
+  @ApiNotFoundResponse({
+    description: 'Técnico no encontrado',
   })
   findOne(@Param('id') id: string) {
     return this.techniciansService.findOne(id);

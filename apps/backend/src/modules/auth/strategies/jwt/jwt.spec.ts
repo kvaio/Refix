@@ -1,18 +1,39 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { Jwt } from './jwt';
+import { ConfigService } from '@nestjs/config';
 
-describe('Jwt', () => {
-  let provider: Jwt;
+import { JwtStrategy } from './jwt';
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [Jwt],
-    }).compile();
+describe('JwtStrategy', () => {
+  const configService = {
+    getOrThrow: (key: string) => {
+      if (key === 'JWT_SECRET') {
+        return 'test-secret';
+      }
 
-    provider = module.get<Jwt>(Jwt);
-  });
+      throw new Error(`Configuración no encontrada: ${key}`);
+    },
+  } as unknown as ConfigService;
 
   it('should be defined', () => {
-    expect(provider).toBeDefined();
+    const strategy = new JwtStrategy(configService);
+
+    expect(strategy).toBeDefined();
+  });
+
+  it('should validate JWT payload', async () => {
+    const strategy = new JwtStrategy(configService);
+
+    const payload = {
+      sub: 'user-001',
+      email: 'test@refix.com',
+      role: 'CLIENT',
+    };
+
+    await expect(
+      strategy.validate(payload),
+    ).resolves.toEqual({
+      id: 'user-001',
+      email: 'test@refix.com',
+      role: 'CLIENT',
+    });
   });
 });
