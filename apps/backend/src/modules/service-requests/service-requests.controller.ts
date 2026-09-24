@@ -3,11 +3,13 @@ import {
   Controller,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
+
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -49,19 +51,21 @@ export class ServiceRequestsController {
   @UseGuards(RolesGuard)
   @ApiOperation({
     summary: 'Crear una solicitud de servicio',
+    description:
+      'Crea una nueva solicitud en estado SOLICITADO.',
   })
   @ApiResponse({
     status: 201,
-    description: 'Solicitud creada correctamente',
+    description: 'Solicitud creada correctamente.',
   })
   @ApiBadRequestResponse({
-    description: 'Datos inválidos',
+    description: 'Datos inválidos.',
   })
   @ApiUnauthorizedResponse({
-    description: 'JWT inválido o ausente',
+    description: 'JWT inválido o ausente.',
   })
   @ApiForbiddenResponse({
-    description: 'El usuario no tiene rol CLIENT',
+    description: 'El usuario no tiene rol CLIENT.',
   })
   create(
     @Body() dto: CreateServiceRequestDto,
@@ -75,14 +79,16 @@ export class ServiceRequestsController {
 
   @Get()
   @ApiOperation({
-    summary: 'Obtener solicitudes disponibles o propias',
+    summary: 'Obtener solicitudes de servicio',
+    description:
+      'Devuelve las solicitudes visibles para el usuario autenticado según su rol.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Solicitudes obtenidas correctamente',
+    description: 'Solicitudes obtenidas correctamente.',
   })
   @ApiUnauthorizedResponse({
-    description: 'JWT inválido o ausente',
+    description: 'JWT inválido o ausente.',
   })
   findAll(@Req() req: AuthenticatedRequest) {
     return this.serviceRequestsService.findAll(req.user);
@@ -92,25 +98,30 @@ export class ServiceRequestsController {
   @ApiOperation({
     summary: 'Obtener una solicitud por ID',
   })
+
   @ApiParam({
     name: 'id',
+    description: 'Identificador UUID de la solicitud.',
     example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
   })
   @ApiResponse({
     status: 200,
-    description: 'Solicitud obtenida correctamente',
+    description: 'Solicitud obtenida correctamente.',
   })
   @ApiUnauthorizedResponse({
-    description: 'JWT inválido o ausente',
+    description: 'JWT inválido o ausente.',
   })
   @ApiForbiddenResponse({
-    description: 'El usuario no tiene acceso a esta solicitud',
+    description:
+      'El usuario no tiene acceso a esta solicitud.',
   })
   @ApiNotFoundResponse({
-    description: 'Solicitud no encontrada',
+    description: 'Solicitud no encontrada.',
   })
+
   findOne(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Req() req: AuthenticatedRequest,
   ) {
     return this.serviceRequestsService.findOne(
@@ -119,30 +130,40 @@ export class ServiceRequestsController {
     );
   }
 
+
+
   @Patch(':id/accept')
   @Roles('TECHNICIAN')
   @UseGuards(RolesGuard)
   @ApiOperation({
     summary: 'Aceptar una solicitud',
+    description:
+      'Asigna la solicitud al técnico autenticado y la mueve de SOLICITADO a AGENDADO.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Identificador de la solicitud.',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @ApiResponse({
     status: 200,
-    description: 'Solicitud aceptada correctamente',
+    description: 'Solicitud aceptada correctamente.',
   })
   @ApiBadRequestResponse({
-    description: 'La solicitud no puede ser aceptada',
+    description:
+      'La solicitud no puede ser aceptada por su estado actual o ya tiene un técnico asignado.',
   })
   @ApiUnauthorizedResponse({
-    description: 'JWT inválido o ausente',
+    description: 'JWT inválido o ausente.',
   })
   @ApiForbiddenResponse({
-    description: 'El usuario no tiene rol TECHNICIAN',
+    description: 'El usuario no tiene rol TECHNICIAN.',
   })
   @ApiNotFoundResponse({
-    description: 'Solicitud no encontrada',
+    description: 'Solicitud no encontrada.',
   })
   accept(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Req() req: AuthenticatedRequest,
   ) {
     return this.serviceRequestsService.accept(
@@ -151,56 +172,77 @@ export class ServiceRequestsController {
     );
   }
 
+
+
   @Patch(':id/reject')
   @Roles('TECHNICIAN')
   @UseGuards(RolesGuard)
   @ApiOperation({
     summary: 'Rechazar una solicitud',
+    description:
+      'Rechaza la solicitud y la mueve de SOLICITADO a CANCELADO.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Identificador de la solicitud.',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @ApiResponse({
     status: 200,
-    description: 'Solicitud rechazada correctamente',
+    description:
+      'Solicitud rechazada y marcada como CANCELADO.',
   })
   @ApiBadRequestResponse({
-    description: 'La solicitud no puede ser rechazada',
+    description:
+      'La solicitud no puede ser rechazada por su estado actual.',
   })
   @ApiUnauthorizedResponse({
-    description: 'JWT inválido o ausente',
+    description: 'JWT inválido o ausente.',
   })
   @ApiForbiddenResponse({
-    description: 'El usuario no tiene rol TECHNICIAN',
+    description: 'El usuario no tiene rol TECHNICIAN.',
   })
   @ApiNotFoundResponse({
-    description: 'Solicitud no encontrada',
-  })
-  reject(@Param('id') id: string) {
+    description: 'Solicitud no encontrada.',
+  })reject(@Param('id', new ParseUUIDPipe()) id: string,) {
     return this.serviceRequestsService.reject(id);
   }
+
 
   @Patch(':id/status')
   @Roles('TECHNICIAN', 'ADMIN')
   @UseGuards(RolesGuard)
   @ApiOperation({
     summary: 'Actualizar estado de una solicitud',
+    description:
+      'Realiza una transición de estado válida según la máquina de estados de ReFix.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Identificador de la solicitud.',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @ApiResponse({
     status: 200,
-    description: 'Estado actualizado correctamente',
+    description: 'Estado actualizado correctamente.',
   })
   @ApiBadRequestResponse({
-    description: 'Transición de estado inválida',
+    description:
+      'El estado solicitado no puede alcanzarse desde el estado actual.',
   })
   @ApiUnauthorizedResponse({
-    description: 'JWT inválido o ausente',
+    description: 'JWT inválido o ausente.',
   })
   @ApiForbiddenResponse({
-    description: 'El usuario no tiene permisos',
+    description:
+      'El usuario no tiene permisos para modificar la solicitud.',
   })
   @ApiNotFoundResponse({
-    description: 'Solicitud no encontrada',
+    description: 'Solicitud no encontrada.',
   })
+
   updateStatus(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateServiceRequestStatusDto,
     @Req() req: AuthenticatedRequest,
   ) {
