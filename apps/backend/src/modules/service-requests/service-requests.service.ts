@@ -36,6 +36,10 @@ export class ServiceRequestsService {
   private readonly requests: ServiceRequest[] = [];
 
   create(dto: CreateServiceRequestDto, user: AuthUser) {
+    if (user.role !== 'CLIENT') {
+      throw new ForbiddenException('Solo un cliente puede crear una solicitud');
+    }
+
     const now = new Date().toISOString();
 
     const request: ServiceRequest = {
@@ -90,6 +94,12 @@ export class ServiceRequestsService {
   }
 
   accept(id: string, user: AuthUser) {
+    if (user.role !== 'TECHNICIAN') {
+      throw new ForbiddenException(
+        'Solo un técnico puede aceptar una solicitud',
+      );
+    }
+
     const request = this.findRequest(id);
     if (!canTransition(request.status, ServiceRequestStatus.AGENDADO)) {
       throw new BadRequestException(
@@ -108,7 +118,14 @@ export class ServiceRequestsService {
     request.updatedAt = new Date().toISOString();
     return request;
   }
-  reject(id: string) {
+
+  reject(id: string, user: AuthUser) {
+    if (user.role !== 'TECHNICIAN') {
+      throw new ForbiddenException(
+        'Solo un técnico puede rechazar una solicitud',
+      );
+    }
+
     const request = this.findRequest(id);
     if (!canTransition(request.status, ServiceRequestStatus.CANCELADO)) {
       throw new BadRequestException(
@@ -122,8 +139,13 @@ export class ServiceRequestsService {
   }
 
   updateStatus(id: string, dto: UpdateServiceRequestStatusDto, user: AuthUser) {
-    const request = this.findRequest(id);
+    if (user.role !== 'TECHNICIAN' && user.role !== 'ADMIN') {
+      throw new ForbiddenException(
+        'Solo un técnico o administrador puede actualizar el estado',
+      );
+    }
 
+    const request = this.findRequest(id);
     const isOwner = request.technicianId === user.id;
     const isAdmin = user.role === 'ADMIN';
 

@@ -36,16 +36,15 @@ describe('ServiceRequestsController', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
 
-    const module: TestingModule =
-      await Test.createTestingModule({
-        controllers: [ServiceRequestsController],
-        providers: [
-          {
-            provide: ServiceRequestsService,
-            useValue: serviceMock,
-          },
-        ],
-      }).compile();
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [ServiceRequestsController],
+      providers: [
+        {
+          provide: ServiceRequestsService,
+          useValue: serviceMock,
+        },
+      ],
+    }).compile();
 
     controller = module.get<ServiceRequestsController>(
       ServiceRequestsController,
@@ -59,8 +58,7 @@ describe('ServiceRequestsController', () => {
   it('debe delegar la creación de una solicitud al servicio', () => {
     const dto = {
       title: 'Laptop no enciende',
-      description:
-        'La laptop dejó de encender después de conectarla.',
+      description: 'La laptop dejó de encender después de conectarla.',
       deviceType: 'Laptop',
       latitude: 20.6534,
       longitude: -103.3496,
@@ -73,15 +71,9 @@ describe('ServiceRequestsController', () => {
 
     serviceMock.create.mockReturnValue(expected);
 
-    const result = controller.create(
-      dto,
-      clientRequest as never,
-    );
+    const result = controller.create(dto, clientRequest as never);
 
-    expect(serviceMock.create).toHaveBeenCalledWith(
-      dto,
-      clientRequest.user,
-    );
+    expect(serviceMock.create).toHaveBeenCalledWith(dto, clientRequest.user);
     expect(result).toBe(expected);
   });
 
@@ -90,13 +82,9 @@ describe('ServiceRequestsController', () => {
 
     serviceMock.findAll.mockReturnValue(expected);
 
-    const result = controller.findAll(
-      technicianRequest as never,
-    );
+    const result = controller.findAll(technicianRequest as never);
 
-    expect(serviceMock.findAll).toHaveBeenCalledWith(
-      technicianRequest.user,
-    );
+    expect(serviceMock.findAll).toHaveBeenCalledWith(technicianRequest.user);
     expect(result).toBe(expected);
   });
 
@@ -108,10 +96,7 @@ describe('ServiceRequestsController', () => {
 
     serviceMock.findOne.mockReturnValue(expected);
 
-    const result = controller.findOne(
-      'request-001',
-      clientRequest as never,
-    );
+    const result = controller.findOne('request-001', clientRequest as never);
 
     expect(serviceMock.findOne).toHaveBeenCalledWith(
       'request-001',
@@ -129,10 +114,7 @@ describe('ServiceRequestsController', () => {
 
     serviceMock.accept.mockReturnValue(expected);
 
-    const result = controller.accept(
-      'request-001',
-      technicianRequest as never,
-    );
+    const result = controller.accept('request-001', technicianRequest as never);
 
     expect(serviceMock.accept).toHaveBeenCalledWith(
       'request-001',
@@ -146,13 +128,11 @@ describe('ServiceRequestsController', () => {
       id: 'request-001',
       status: ServiceRequestStatus.CANCELADO,
     };
-
     serviceMock.reject.mockReturnValue(expected);
-
-    const result = controller.reject('request-001');
-
+    const result = controller.reject('request-001', technicianRequest as never);
     expect(serviceMock.reject).toHaveBeenCalledWith(
       'request-001',
+      technicianRequest.user,
     );
     expect(result).toBe(expected);
   });
@@ -175,9 +155,7 @@ describe('ServiceRequestsController', () => {
       technicianRequest as never,
     );
 
-    expect(
-      serviceMock.updateStatus,
-    ).toHaveBeenCalledWith(
+    expect(serviceMock.updateStatus).toHaveBeenCalledWith(
       'request-001',
       dto,
       technicianRequest.user,

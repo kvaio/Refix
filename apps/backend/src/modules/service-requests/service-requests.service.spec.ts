@@ -24,6 +24,12 @@ describe('ServiceRequestsService', () => {
     role: 'TECHNICIAN',
   };
 
+  const admin = {
+    id: 'admin-001',
+    email: 'admin@test.com',
+    role: 'ADMIN',
+  };
+
   const createDto = {
     title: 'Laptop no enciende',
     description: 'La laptop dejó de encender.',
@@ -55,19 +61,14 @@ describe('ServiceRequestsService', () => {
 
   it('un técnico debe poder aceptar una solicitud solicitada', () => {
     const request = service.create(createDto, client);
-
     const accepted = service.accept(request.id, technician);
-
     expect(accepted.status).toBe(ServiceRequestStatus.AGENDADO);
-
     expect(accepted.technicianId).toBe(technician.id);
   });
 
   it('debe poder cancelar una solicitud solicitada', () => {
     const request = service.create(createDto, client);
-
-    const cancelled = service.reject(request.id);
-
+    const cancelled = service.reject(request.id, technician);
     expect(cancelled.status).toBe(ServiceRequestStatus.CANCELADO);
   });
 
@@ -520,6 +521,83 @@ describe('ServiceRequestsService', () => {
   it('debe lanzar NotFoundException para una solicitud inexistente', () => {
     expect(() => service.findOne('does-not-exist', client)).toThrow(
       NotFoundException,
+    );
+  });
+  it('no debe permitir que otro cliente consulte una solicitud ajena', () => {
+    const request = service.create(createDto, client);
+
+    const anotherClient = {
+      id: 'client-002',
+      email: 'client2@test.com',
+      role: 'CLIENT',
+    };
+
+    expect(() => service.findOne(request.id, anotherClient)).toThrow(
+      ForbiddenException,
+    );
+  });
+
+  it('no debe permitir que otro técnico consulte una solicitud ajena', () => {
+    const request = service.create(createDto, client);
+
+    service.accept(request.id, technician);
+
+    expect(() => service.findOne(request.id, anotherTechnician)).toThrow(
+      ForbiddenException,
+    );
+  });
+
+  it('no debe permitir que un cliente modifique el estado de una solicitud', () => {
+    const request = service.create(createDto, client);
+
+    service.accept(request.id, technician);
+
+    expect(() =>
+      service.updateStatus(
+        request.id,
+        {
+          status: ServiceRequestStatus.RECIBIDO,
+        },
+        client,
+      ),
+    ).toThrow(ForbiddenException);
+  });
+
+  it('debe permitir que un administrador modifique el estado de una solicitud', () => {
+    const request = service.create(createDto, client);
+
+    service.accept(request.id, technician);
+
+    const updated = service.updateStatus(
+      request.id,
+      {
+        status: ServiceRequestStatus.RECIBIDO,
+      },
+      admin,
+    );
+
+    expect(updated.status).toBe(ServiceRequestStatus.RECIBIDO);
+  });
+
+  it('no debe permitir que un técnico cree una solicitud', () => {
+    expect(() => service.create(createDto, technician)).toThrow(
+      ForbiddenException,
+    );
+  });
+
+  it('no debe permitir que un cliente acepte una solicitud', () => {
+    const request = service.create(createDto, client);
+
+    expect(() => service.accept(request.id, client)).toThrow(
+      ForbiddenException,
+    );
+  });
+
+  it('no debe permitir que un cliente rechace una solicitud', () => {
+    const request = service.create(createDto, client);
+
+    expect(() => service.reject(request.id, client)).toThrow(
+      ForbiddenException,
     );
   });
 });

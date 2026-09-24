@@ -1,7 +1,4 @@
-import {
-  INestApplication,
-  ValidationPipe,
-} from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
@@ -42,27 +39,32 @@ describe('ServiceRequests API (e2e)', () => {
     role: 'TECHNICIAN',
   };
 
+  const admin = {
+    id: 'admin-001',
+    email: 'admin@test.com',
+    role: 'ADMIN',
+  };
+
   beforeAll(async () => {
-    const moduleFixture: TestingModule =
-      await Test.createTestingModule({
-        imports: [
-          ConfigModule.forRoot({
-            isGlobal: true,
-            load: [configuration],
-          }),
-          AuthModule,
-          ServiceRequestsModule,
-        ],
-        providers: [
-          {
-            provide: APP_GUARD,
-            useClass: JwtAuthGuard,
-          },
-        ],
-      })
-        .overrideProvider(ServiceRequestsService)
-        .useValue(serviceMock)
-        .compile();
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          load: [configuration],
+        }),
+        AuthModule,
+        ServiceRequestsModule,
+      ],
+      providers: [
+        {
+          provide: APP_GUARD,
+          useClass: JwtAuthGuard,
+        },
+      ],
+    })
+      .overrideProvider(ServiceRequestsService)
+      .useValue(serviceMock)
+      .compile();
 
     app = moduleFixture.createNestApplication();
 
@@ -86,7 +88,7 @@ describe('ServiceRequests API (e2e)', () => {
   });
 
   const createToken = (
-    user: typeof client,
+    user: typeof client | typeof technician | typeof admin,
   ) => {
     return jwtService.sign({
       sub: user.id,
@@ -103,8 +105,7 @@ describe('ServiceRequests API (e2e)', () => {
       clientId: client.id,
       technicianId: null,
       title: 'Laptop no enciende',
-      description:
-        'La laptop dejó de encender después de conectarla.',
+      description: 'La laptop dejó de encender después de conectarla.',
       deviceType: 'Laptop',
       latitude: 20.6534,
       longitude: -103.3496,
@@ -129,10 +130,10 @@ describe('ServiceRequests API (e2e)', () => {
       status: ServiceRequestStatus.CANCELADO,
     });
 
-    serviceMock.updateStatus.mockReturnValue({
+    serviceMock.updateStatus.mockImplementation((_id, dto) => ({
       id: '123e4567-e89b-12d3-a456-426614174000',
-      status: ServiceRequestStatus.EN_PROCESO,
-    });
+      status: dto.status,
+    }));
   });
 
   it('debe crear una solicitud válida', async () => {
@@ -143,28 +144,21 @@ describe('ServiceRequests API (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         title: 'Laptop no enciende',
-        description:
-          'La laptop dejó de encender después de conectarla.',
+        description: 'La laptop dejó de encender después de conectarla.',
         deviceType: 'Laptop',
         latitude: 20.6534,
         longitude: -103.3496,
       })
       .expect(201)
       .expect(({ body }) => {
-        expect(body.status).toBe(
-          ServiceRequestStatus.SOLICITADO,
-        );
+        expect(body.status).toBe(ServiceRequestStatus.SOLICITADO);
       });
 
-    expect(
-      serviceMock.create,
-    ).toHaveBeenCalledTimes(1);
+    expect(serviceMock.create).toHaveBeenCalledTimes(1);
   });
 
   it('debe rechazar una solicitud sin JWT', async () => {
-    await request(app.getHttpServer())
-      .get('/api/service-requests')
-      .expect(401);
+    await request(app.getHttpServer()).get('/api/service-requests').expect(401);
   });
 
   it('debe rechazar la creación si el DTO es inválido', async () => {
@@ -182,9 +176,7 @@ describe('ServiceRequests API (e2e)', () => {
       })
       .expect(400);
 
-    expect(
-      serviceMock.create,
-    ).not.toHaveBeenCalled();
+    expect(serviceMock.create).not.toHaveBeenCalled();
   });
 
   it('debe rechazar la creación si el rol no es CLIENT', async () => {
@@ -195,17 +187,14 @@ describe('ServiceRequests API (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         title: 'Laptop no enciende',
-        description:
-          'La laptop dejó de encender después de conectarla.',
+        description: 'La laptop dejó de encender después de conectarla.',
         deviceType: 'Laptop',
         latitude: 20.6534,
         longitude: -103.3496,
       })
       .expect(403);
 
-    expect(
-      serviceMock.create,
-    ).not.toHaveBeenCalled();
+    expect(serviceMock.create).not.toHaveBeenCalled();
   });
 
   it('debe rechazar un UUID inválido', async () => {
@@ -216,9 +205,7 @@ describe('ServiceRequests API (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(400);
 
-    expect(
-      serviceMock.findOne,
-    ).not.toHaveBeenCalled();
+    expect(serviceMock.findOne).not.toHaveBeenCalled();
   });
 
   it('debe permitir que un técnico acepte una solicitud', async () => {
@@ -231,24 +218,18 @@ describe('ServiceRequests API (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
       .expect(({ body }) => {
-        expect(body.status).toBe(
-          ServiceRequestStatus.AGENDADO,
-        );
+        expect(body.status).toBe(ServiceRequestStatus.AGENDADO);
 
-        expect(body.technicianId).toBe(
-          technician.id,
-        );
+        expect(body.technicianId).toBe(technician.id);
       });
 
-    expect(
-      serviceMock.accept,
-    ).toHaveBeenCalledWith(
+    expect(serviceMock.accept).toHaveBeenCalledWith(
       '123e4567-e89b-12d3-a456-426614174000',
       technician,
     );
   });
 
-   it('debe rechazar propiedades no permitidas en el DTO', async () => {
+  it('debe rechazar propiedades no permitidas en el DTO', async () => {
     const token = createToken(client);
 
     await request(app.getHttpServer())
@@ -256,8 +237,7 @@ describe('ServiceRequests API (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         title: 'Laptop no enciende',
-        description:
-          'La laptop dejó de encender después de conectarla.',
+        description: 'La laptop dejó de encender después de conectarla.',
         deviceType: 'Laptop',
         latitude: 20.6534,
         longitude: -103.3496,
@@ -265,9 +245,7 @@ describe('ServiceRequests API (e2e)', () => {
       })
       .expect(400);
 
-    expect(
-      serviceMock.create,
-    ).not.toHaveBeenCalled();
+    expect(serviceMock.create).not.toHaveBeenCalled();
   });
 
   it('debe rechazar un estado inexistente', async () => {
@@ -283,9 +261,7 @@ describe('ServiceRequests API (e2e)', () => {
       })
       .expect(400);
 
-    expect(
-      serviceMock.updateStatus,
-    ).not.toHaveBeenCalled();
+    expect(serviceMock.updateStatus).not.toHaveBeenCalled();
   });
 
   it('debe rechazar una actualización de estado sin JWT', async () => {
@@ -298,9 +274,7 @@ describe('ServiceRequests API (e2e)', () => {
       })
       .expect(401);
 
-    expect(
-      serviceMock.updateStatus,
-    ).not.toHaveBeenCalled();
+    expect(serviceMock.updateStatus).not.toHaveBeenCalled();
   });
 
   it('debe rechazar una solicitud y marcarla como CANCELADO', async () => {
@@ -313,18 +287,16 @@ describe('ServiceRequests API (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
       .expect(({ body }) => {
-        expect(body.status).toBe(
-          ServiceRequestStatus.CANCELADO,
-        );
+        expect(body.status).toBe(ServiceRequestStatus.CANCELADO);
       });
 
-    expect(
-      serviceMock.reject,
-    ).toHaveBeenCalledWith(
+    expect(serviceMock.reject).toHaveBeenCalledWith(
       '123e4567-e89b-12d3-a456-426614174000',
-  );
+      technician,
+    );
   });
-    it('debe impedir que un cliente acepte una solicitud', async () => {
+
+  it('debe impedir que un cliente acepte una solicitud', async () => {
     const token = createToken(client);
 
     await request(app.getHttpServer())
@@ -334,9 +306,88 @@ describe('ServiceRequests API (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(403);
 
-    expect(
-      serviceMock.accept,
-    ).not.toHaveBeenCalled();
+    expect(serviceMock.accept).not.toHaveBeenCalled();
+  });
+
+  it('debe impedir que un cliente rechace una solicitud', async () => {
+    const token = createToken(client);
+
+    await request(app.getHttpServer())
+      .patch(
+        '/api/service-requests/123e4567-e89b-12d3-a456-426614174000/reject',
+      )
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403);
+
+    expect(serviceMock.reject).not.toHaveBeenCalled();
+  });
+
+  it('debe impedir que un cliente actualice el estado', async () => {
+    const token = createToken(client);
+
+    await request(app.getHttpServer())
+      .patch(
+        '/api/service-requests/123e4567-e89b-12d3-a456-426614174000/status',
+      )
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        status: ServiceRequestStatus.RECIBIDO,
+      })
+      .expect(403);
+
+    expect(serviceMock.updateStatus).not.toHaveBeenCalled();
+  });
+
+  it('debe impedir que un técnico cree una solicitud', async () => {
+    const token = createToken(technician);
+
+    await request(app.getHttpServer())
+      .post('/api/service-requests')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Laptop no enciende',
+        description: 'La laptop dejó de encender después de conectarla.',
+        deviceType: 'Laptop',
+        latitude: 20.6534,
+        longitude: -103.3496,
+      })
+      .expect(403);
+
+    expect(serviceMock.create).not.toHaveBeenCalled();
+  });
+
+  it('debe rechazar una aceptación sin JWT', async () => {
+    await request(app.getHttpServer())
+      .patch(
+        '/api/service-requests/123e4567-e89b-12d3-a456-426614174000/accept',
+      )
+      .expect(401);
+
+    expect(serviceMock.accept).not.toHaveBeenCalled();
+  });
+
+  it('debe permitir que un administrador actualice el estado', async () => {
+    const token = createToken(admin);
+
+    await request(app.getHttpServer())
+      .patch(
+        '/api/service-requests/123e4567-e89b-12d3-a456-426614174000/status',
+      )
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        status: ServiceRequestStatus.RECIBIDO,
+      })
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.status).toBe(ServiceRequestStatus.RECIBIDO);
+      });
+
+    expect(serviceMock.updateStatus).toHaveBeenCalledWith(
+      '123e4567-e89b-12d3-a456-426614174000',
+      {
+        status: ServiceRequestStatus.RECIBIDO,
+      },
+      admin,
+    );
   });
 });
-  

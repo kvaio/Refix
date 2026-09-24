@@ -51,8 +51,7 @@ export class ServiceRequestsController {
   @UseGuards(RolesGuard)
   @ApiOperation({
     summary: 'Crear una solicitud de servicio',
-    description:
-      'Crea una nueva solicitud en estado SOLICITADO.',
+    description: 'Crea una nueva solicitud en estado SOLICITADO.',
   })
   @ApiResponse({
     status: 201,
@@ -71,10 +70,7 @@ export class ServiceRequestsController {
     @Body() dto: CreateServiceRequestDto,
     @Req() req: AuthenticatedRequest,
   ) {
-    return this.serviceRequestsService.create(
-      dto,
-      req.user,
-    );
+    return this.serviceRequestsService.create(dto, req.user);
   }
 
   @Get()
@@ -98,7 +94,6 @@ export class ServiceRequestsController {
   @ApiOperation({
     summary: 'Obtener una solicitud por ID',
   })
-
   @ApiParam({
     name: 'id',
     description: 'Identificador UUID de la solicitud.',
@@ -113,24 +108,17 @@ export class ServiceRequestsController {
     description: 'JWT inválido o ausente.',
   })
   @ApiForbiddenResponse({
-    description:
-      'El usuario no tiene acceso a esta solicitud.',
+    description: 'El usuario no tiene acceso a esta solicitud.',
   })
   @ApiNotFoundResponse({
     description: 'Solicitud no encontrada.',
   })
-
   findOne(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Req() req: AuthenticatedRequest,
   ) {
-    return this.serviceRequestsService.findOne(
-      id,
-      req.user,
-    );
+    return this.serviceRequestsService.findOne(id, req.user);
   }
-
-
 
   @Patch(':id/accept')
   @Roles('TECHNICIAN')
@@ -166,21 +154,15 @@ export class ServiceRequestsController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Req() req: AuthenticatedRequest,
   ) {
-    return this.serviceRequestsService.accept(
-      id,
-      req.user,
-    );
+    return this.serviceRequestsService.accept(id, req.user);
   }
-
-
 
   @Patch(':id/reject')
   @Roles('TECHNICIAN')
   @UseGuards(RolesGuard)
   @ApiOperation({
     summary: 'Rechazar una solicitud',
-    description:
-      'Rechaza la solicitud y la mueve de SOLICITADO a CANCELADO.',
+    description: 'Rechaza la solicitud y la mueve de SOLICITADO a CANCELADO.',
   })
   @ApiParam({
     name: 'id',
@@ -189,12 +171,10 @@ export class ServiceRequestsController {
   })
   @ApiResponse({
     status: 200,
-    description:
-      'Solicitud rechazada y marcada como CANCELADO.',
+    description: 'Solicitud rechazada y marcada como CANCELADO.',
   })
   @ApiBadRequestResponse({
-    description:
-      'La solicitud no puede ser rechazada por su estado actual.',
+    description: 'La solicitud no puede ser rechazada por su estado actual.',
   })
   @ApiUnauthorizedResponse({
     description: 'JWT inválido o ausente.',
@@ -204,10 +184,13 @@ export class ServiceRequestsController {
   })
   @ApiNotFoundResponse({
     description: 'Solicitud no encontrada.',
-  })reject(@Param('id', new ParseUUIDPipe()) id: string,) {
-    return this.serviceRequestsService.reject(id);
+  })
+  reject(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.serviceRequestsService.reject(id, req.user);
   }
-
 
   @Patch(':id/status')
   @Roles('TECHNICIAN', 'ADMIN')
@@ -234,22 +217,16 @@ export class ServiceRequestsController {
     description: 'JWT inválido o ausente.',
   })
   @ApiForbiddenResponse({
-    description:
-      'El usuario no tiene permisos para modificar la solicitud.',
+    description: 'El usuario no tiene permisos para modificar la solicitud.',
   })
   @ApiNotFoundResponse({
     description: 'Solicitud no encontrada.',
   })
-
   updateStatus(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateServiceRequestStatusDto,
     @Req() req: AuthenticatedRequest,
   ) {
-    return this.serviceRequestsService.updateStatus(
-      id,
-      dto,
-      req.user,
-    );
+    return this.serviceRequestsService.updateStatus(id, dto, req.user);
   }
 }
