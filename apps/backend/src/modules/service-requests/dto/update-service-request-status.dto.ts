@@ -1,19 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 
-export enum ServiceRequestStatus {
-  PENDING = 'PENDING',
-  ACCEPTED = 'ACCEPTED',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-  REJECTED = 'REJECTED',
-}
+import { ServiceRequestStatus } from '../domain/service-request-status';
+
+export { ServiceRequestStatus };
 
 export class UpdateServiceRequestStatusDto {
   @ApiProperty({
     enum: ServiceRequestStatus,
-    example: ServiceRequestStatus.IN_PROGRESS,
+    example: ServiceRequestStatus.EN_PROCESO,
   })
   @IsEnum(ServiceRequestStatus)
   status: ServiceRequestStatus;

@@ -5,14 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import {
-  CreateServiceRequestDto,
-} from './dto/create-service-request.dto';
+import { CreateServiceRequestDto } from './dto/create-service-request.dto';
+import { UpdateServiceRequestStatusDto } from './dto/update-service-request-status.dto';
 
-import {
-  ServiceRequestStatus,
-  UpdateServiceRequestStatusDto,
-} from './dto/update-service-request-status.dto';
+import { ServiceRequestStatus } from './domain/service-request-status';
+import { canTransition } from './domain/service-request-status.machine';
 
 interface AuthUser {
   id: string;
@@ -50,7 +47,7 @@ export class ServiceRequestsService {
       deviceType: dto.deviceType,
       latitude: dto.latitude,
       longitude: dto.longitude,
-      status: ServiceRequestStatus.PENDING,
+      status: ServiceRequestStatus.SOLICITADO,
       createdAt: now,
       updatedAt: now,
     };
@@ -68,14 +65,11 @@ export class ServiceRequestsService {
     if (user.role === 'TECHNICIAN') {
       return this.requests.filter(
         (request) =>
-          request.technicianId === null ||
-          request.technicianId === user.id,
+          request.technicianId === null || request.technicianId === user.id,
       );
     }
 
-    return this.requests.filter(
-      (request) => request.clientId === user.id,
-    );
+    return this.requests.filter((request) => request.clientId === user.id);
   }
 
   findOne(id: string, user: AuthUser) {
@@ -97,10 +91,9 @@ export class ServiceRequestsService {
 
   accept(id: string, user: AuthUser) {
     const request = this.findRequest(id);
-
-    if (request.status !== ServiceRequestStatus.PENDING) {
+    if (!canTransition(request.status, ServiceRequestStatus.AGENDADO)) {
       throw new BadRequestException(
-        'Solo una solicitud pendiente puede ser aceptada',
+        `Transición de estado no permitida: ${request.status} → ${ServiceRequestStatus.AGENDADO}`,
       );
     }
 
@@ -111,50 +104,38 @@ export class ServiceRequestsService {
     }
 
     request.technicianId = user.id;
-    request.status = ServiceRequestStatus.ACCEPTED;
+    request.status = ServiceRequestStatus.AGENDADO;
     request.updatedAt = new Date().toISOString();
-
     return request;
   }
-
   reject(id: string) {
     const request = this.findRequest(id);
-
-    if (request.status !== ServiceRequestStatus.PENDING) {
+    if (!canTransition(request.status, ServiceRequestStatus.CANCELADO)) {
       throw new BadRequestException(
-        'Solo una solicitud pendiente puede ser rechazada',
+        `Transición de estado no permitida: ${request.status} → ${ServiceRequestStatus.CANCELADO}`,
       );
     }
 
-    request.status = ServiceRequestStatus.REJECTED;
+    request.status = ServiceRequestStatus.CANCELADO;
     request.updatedAt = new Date().toISOString();
-
     return request;
   }
 
-  updateStatus(
-    id: string,
-    dto: UpdateServiceRequestStatusDto,
-    user: AuthUser,
-  ) {
+  updateStatus(id: string, dto: UpdateServiceRequestStatusDto, user: AuthUser) {
     const request = this.findRequest(id);
 
-    const isOwner =
-      request.technicianId === user.id;
-
-    const isAdmin =
-      user.role === 'ADMIN';
+    const isOwner = request.technicianId === user.id;
+    const isAdmin = user.role === 'ADMIN';
 
     if (!isOwner && !isAdmin) {
-      throw new ForbiddenException(
-        'No puedes modificar esta solicitud',
-      );
+      throw new ForbiddenException('No puedes modificar esta solicitud');
     }
 
-    this.validateStatusTransition(
-      request.status,
-      dto.status,
-    );
+    if (!canTransition(request.status, dto.status)) {
+      throw new BadRequestException(
+        `Transición de estado no permitida: ${request.status} → ${dto.status}`,
+      );
+    }
 
     request.status = dto.status;
     request.updatedAt = new Date().toISOString();
@@ -162,47 +143,11 @@ export class ServiceRequestsService {
     return request;
   }
 
-  private validateStatusTransition(
-    currentStatus: ServiceRequestStatus,
-    nextStatus: ServiceRequestStatus,
-  ) {
-    const allowedTransitions: Record<
-      ServiceRequestStatus,
-      ServiceRequestStatus[]
-    > = {
-      [ServiceRequestStatus.PENDING]: [
-        ServiceRequestStatus.REJECTED,
-      ],
-      [ServiceRequestStatus.ACCEPTED]: [
-        ServiceRequestStatus.IN_PROGRESS,
-      ],
-      [ServiceRequestStatus.IN_PROGRESS]: [
-        ServiceRequestStatus.COMPLETED,
-      ],
-      [ServiceRequestStatus.COMPLETED]: [],
-      [ServiceRequestStatus.REJECTED]: [],
-      [ServiceRequestStatus.CANCELLED]: [],
-    };
-
-    const allowed =
-      allowedTransitions[currentStatus];
-
-    if (!allowed.includes(nextStatus)) {
-      throw new BadRequestException(
-        `Transición de estado no permitida: ${currentStatus} → ${nextStatus}`,
-      );
-    }
-  }
-
   private findRequest(id: string) {
-    const request = this.requests.find(
-      (item) => item.id === id,
-    );
+    const request = this.requests.find((item) => item.id === id);
 
     if (!request) {
-      throw new NotFoundException(
-        'Solicitud de servicio no encontrada',
-      );
+      throw new NotFoundException('Solicitud de servicio no encontrada');
     }
 
     return request;
