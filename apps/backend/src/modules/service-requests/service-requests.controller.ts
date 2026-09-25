@@ -120,6 +120,25 @@ export class ServiceRequestsController {
     return this.serviceRequestsService.findOne(id, req.user);
   }
 
+  @Get(':id/history')
+  @ApiOperation({
+    summary: 'Consultar el historial de estados de una solicitud',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Historial de estados de la solicitud.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'El usuario no tiene acceso a la solicitud.',
+  })
+  getHistory(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.serviceRequestsService.getHistory(id, req.user);
+  }
+
   @Patch(':id/accept')
   @Roles('TECHNICIAN')
   @UseGuards(RolesGuard)
