@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: refix_db
+    restart: always
+    environment:
+      POSTGRES_USER: refix_admin
+      POSTGRES_PASSWORD: refix_secure_pass
+      POSTGRES_DB: refix_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
