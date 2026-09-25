@@ -1,17 +1,127 @@
-generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
-}
-
 datasource db {
-  provider = "postgresql"
+  provider   = "postgresql"
+  extensions = [postgis]
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model spatial_ref_sys {
-  srid      Int     @id
-  auth_name String? @db.VarChar(256)
-  auth_srid Int?
-  srtext    String? @db.VarChar(2048)
-  proj4text String? @db.VarChar(2048)
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+// ENUMS
+enum Role {
+  CLIENT
+  TECHNICIAN
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TradeInStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+// TABLAS
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      Role     @default(CLIENT)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  technicianProfile TechnicianProfile?
+  serviceRequests   ServiceRequest[]   @relation("ClientRequests")
+  chatbotLogs       ChatbotLog[]
+  tradeInEstimates  TradeInEstimate[]
+
+  @@map("users")
+}
+
+model TechnicianProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique @map("user_id")
+  bio         String?  @db.Text
+  address     String?
+  isAvailable Boolean  @default(true) @map("is_available")
+  rating      Float    @default(0.0)
+  latitude    Float
+  longitude   Float
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedServices ServiceRequest[] @relation("TechnicianServices")
+
+  @@map("technician_profiles")
+}
+
+model ChatbotLog {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  inputText      String   @db.Text @map("input_text")
+  predictedIssue String   @map("predicted_issue")
+  confidence     Float
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("chatbot_logs")
+}
+
+model ServiceRequest {
+  id            String        @id @default(uuid())
+  clientId      String        @map("client_id")
+  technicianId  String?       @map("technician_id")
+  status        RequestStatus @default(PENDING)
+  description   String        @db.Text
+  estimatedCost Float?        @map("estimated_cost")
+  finalCost     Float?        @map("final_cost")
+  scheduledAt   DateTime?     @map("scheduled_at")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  client     User               @relation("ClientRequests", fields: [clientId], references: [id])
+  technician TechnicianProfile? @relation("TechnicianServices", fields: [technicianId], references: [id])
+  review     Review?
+
+  @@map("service_requests")
+}
+
+model TradeInEstimate {
+  id             String        @id @default(uuid())
+  userId         String        @map("user_id")
+  deviceType     String        @map("device_type")
+  hardwareSpecs  Json          @map("hardware_specs")
+  estimatedValue Float         @map("estimated_value")
+  status         TradeInStatus @default(PENDING)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("trade_in_estimates")
+}
+
+model Review {
+  id               String   @id @default(uuid())
+  serviceRequestId String   @unique @map("service_request_id")
+  rating           Int
+  comment          String?  @db.Text
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  serviceRequest ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
 }

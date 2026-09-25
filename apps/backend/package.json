@@ -49,6 +49,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.0",
     "@types/passport-jwt": "^4.0.1",
+    "@types/pg": "^8.23.1",
     "@types/supertest": "^7.0.0",
     "@vitest/coverage-v8": "^5.0.1",
     "jest": "^30.0.0",
@@ -64,5 +65,8 @@
     "typescript": "^6.0.2",
     "unplugin-swc": "^2.0.0",
     "vitest": "^5.0.1"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }
