@@ -4,6 +4,7 @@ import { vi } from 'vitest';
 import { ServiceRequestsController } from './service-requests.controller';
 import { ServiceRequestsService } from './service-requests.service';
 import { ServiceRequestStatus } from './domain/service-request-status';
+import { ServiceRequestStatus } from './dto/update-service-request-status.dto';
 
 describe('ServiceRequestsController', () => {
   let controller: ServiceRequestsController;
@@ -15,6 +16,7 @@ describe('ServiceRequestsController', () => {
     accept: vi.fn(),
     reject: vi.fn(),
     updateStatus: vi.fn(),
+    getHistory: vi.fn(),
   };
 
   const clientRequest = {
@@ -159,6 +161,34 @@ describe('ServiceRequestsController', () => {
       'request-001',
       dto,
       technicianRequest.user,
+    );
+
+    expect(result).toBe(expected);
+  });
+
+  it('debe delegar la consulta del historial al servicio', () => {
+    const expected = [
+      {
+        id: 'history-1',
+        serviceRequestId: '123e4567-e89b-12d3-a456-426614174000',
+        previousStatus: null,
+        newStatus: ServiceRequestStatus.SOLICITADO,
+        actorId: clientRequest.user.id,
+        actorRole: clientRequest.user.role,
+        createdAt: '2026-09-24T00:00:00.000Z',
+      },
+    ];
+
+    serviceMock.getHistory.mockReturnValue(expected);
+
+    const result = controller.getHistory(
+      '123e4567-e89b-12d3-a456-426614174000',
+      clientRequest as never,
+    );
+
+    expect(serviceMock.getHistory).toHaveBeenCalledWith(
+      '123e4567-e89b-12d3-a456-426614174000',
+      clientRequest.user,
     );
 
     expect(result).toBe(expected);

@@ -25,6 +25,7 @@ describe('ServiceRequests API (e2e)', () => {
     accept: vi.fn(),
     reject: vi.fn(),
     updateStatus: vi.fn(),
+    getHistory: vi.fn(),
   };
 
   const client = {
@@ -134,6 +135,64 @@ describe('ServiceRequests API (e2e)', () => {
       id: '123e4567-e89b-12d3-a456-426614174000',
       status: dto.status,
     }));
+
+    serviceMock.getHistory.mockReturnValue([
+      {
+        id: 'history-1',
+        serviceRequestId: '123e4567-e89b-12d3-a456-426614174000',
+        previousStatus: null,
+        newStatus: ServiceRequestStatus.SOLICITADO,
+        actorId: client.id,
+        actorRole: client.role,
+        createdAt: '2026-09-24T00:00:00.000Z',
+      },
+    ]);
+  });
+
+  it('debe permitir consultar el historial de una solicitud', async () => {
+    const token = createToken(client);
+
+    const response = await request(app.getHttpServer())
+      .get('/api/service-requests/123e4567-e89b-12d3-a456-426614174000/history')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(response.body).toHaveLength(1);
+
+    expect(response.body[0]).toMatchObject({
+      serviceRequestId: '123e4567-e89b-12d3-a456-426614174000',
+      previousStatus: null,
+      newStatus: ServiceRequestStatus.SOLICITADO,
+      actorId: client.id,
+      actorRole: client.role,
+    });
+
+    expect(serviceMock.getHistory).toHaveBeenCalledWith(
+      '123e4567-e89b-12d3-a456-426614174000',
+      expect.objectContaining({
+        id: client.id,
+        role: client.role,
+      }),
+    );
+  });
+
+  it('debe rechazar la consulta del historial sin JWT', async () => {
+    await request(app.getHttpServer())
+      .get('/api/service-requests/123e4567-e89b-12d3-a456-426614174000/history')
+      .expect(401);
+
+    expect(serviceMock.getHistory).not.toHaveBeenCalled();
+  });
+
+  it('debe rechazar la consulta del historial con un UUID inválido', async () => {
+    const token = createToken(client);
+
+    await request(app.getHttpServer())
+      .get('/api/service-requests/no-es-un-uuid/history')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(400);
+
+    expect(serviceMock.getHistory).not.toHaveBeenCalled();
   });
 
   it('debe crear una solicitud válida', async () => {
@@ -219,7 +278,6 @@ describe('ServiceRequests API (e2e)', () => {
       .expect(200)
       .expect(({ body }) => {
         expect(body.status).toBe(ServiceRequestStatus.AGENDADO);
-
         expect(body.technicianId).toBe(technician.id);
       });
 

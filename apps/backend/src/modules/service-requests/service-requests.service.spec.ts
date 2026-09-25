@@ -600,4 +600,264 @@ describe('ServiceRequestsService', () => {
       ForbiddenException,
     );
   });
+
+  it('debe registrar la creación de una solicitud en el historial', () => {
+    const client = {
+      id: 'client-history-1',
+      email: 'client-history-1@test.com',
+      role: 'CLIENT',
+    };
+
+    const request = service.create(
+      {
+        title: 'Laptop no enciende',
+        description: 'La laptop dejó de encender.',
+        deviceType: 'Laptop',
+        latitude: 20.6534,
+        longitude: -103.3496,
+      },
+      client,
+    );
+
+    const history = service.getHistory(request.id, client);
+
+    expect(history).toHaveLength(1);
+    expect(history[0]).toMatchObject({
+      serviceRequestId: request.id,
+      previousStatus: null,
+      newStatus: ServiceRequestStatus.SOLICITADO,
+      actorId: client.id,
+      actorRole: client.role,
+    });
+    expect(history[0].createdAt).toEqual(expect.any(String));
+  });
+
+  it('debe registrar cada transición en orden cronológico', () => {
+    const client = {
+      id: 'client-history-2',
+      email: 'client-history-2@test.com',
+      role: 'CLIENT',
+    };
+
+    const technician = {
+      id: 'tech-history-2',
+      email: 'tech-history-2@test.com',
+      role: 'TECHNICIAN',
+    };
+
+    const request = service.create(
+      {
+        title: 'PC no da video',
+        description: 'La computadora enciende pero no muestra imagen.',
+        deviceType: 'PC',
+        latitude: 20.6534,
+        longitude: -103.3496,
+      },
+      client,
+    );
+
+    service.accept(request.id, technician);
+
+    service.updateStatus(
+      request.id,
+      {
+        status: ServiceRequestStatus.RECIBIDO,
+      },
+      technician,
+    );
+
+    const history = service.getHistory(request.id, client);
+
+    expect(history).toHaveLength(3);
+
+    expect(history[0]).toMatchObject({
+      previousStatus: null,
+      newStatus: ServiceRequestStatus.SOLICITADO,
+      actorId: client.id,
+      actorRole: client.role,
+    });
+
+    expect(history[1]).toMatchObject({
+      previousStatus: ServiceRequestStatus.SOLICITADO,
+      newStatus: ServiceRequestStatus.AGENDADO,
+      actorId: technician.id,
+      actorRole: technician.role,
+    });
+
+    expect(history[2]).toMatchObject({
+      previousStatus: ServiceRequestStatus.AGENDADO,
+      newStatus: ServiceRequestStatus.RECIBIDO,
+      actorId: technician.id,
+      actorRole: technician.role,
+    });
+
+    expect(new Date(history[0].createdAt).getTime()).toBeLessThanOrEqual(
+      new Date(history[1].createdAt).getTime(),
+    );
+
+    expect(new Date(history[1].createdAt).getTime()).toBeLessThanOrEqual(
+      new Date(history[2].createdAt).getTime(),
+    );
+  });
+
+  it('debe permitir consultar el historial al cliente dueño', () => {
+    const client = {
+      id: 'client-history-3',
+      email: 'client-history-3@test.com',
+      role: 'CLIENT',
+    };
+
+    const request = service.create(
+      {
+        title: 'Monitor apagado',
+        description: 'El monitor no enciende.',
+        deviceType: 'Monitor',
+        latitude: 20.6534,
+        longitude: -103.3496,
+      },
+      client,
+    );
+
+    const history = service.getHistory(request.id, client);
+
+    expect(history).toHaveLength(1);
+  });
+
+  it('debe permitir consultar el historial al técnico asignado', () => {
+    const client = {
+      id: 'client-history-4',
+      email: 'client-history-4@test.com',
+      role: 'CLIENT',
+    };
+
+    const technician = {
+      id: 'tech-history-4',
+      email: 'tech-history-4@test.com',
+      role: 'TECHNICIAN',
+    };
+
+    const request = service.create(
+      {
+        title: 'Celular con falla',
+        description: 'El celular se apaga solo.',
+        deviceType: 'Celular',
+        latitude: 20.6534,
+        longitude: -103.3496,
+      },
+      client,
+    );
+
+    service.accept(request.id, technician);
+
+    const history = service.getHistory(request.id, technician);
+
+    expect(history).toHaveLength(2);
+  });
+
+  it('debe permitir consultar el historial al administrador', () => {
+    const client = {
+      id: 'client-history-5',
+      email: 'client-history-5@test.com',
+      role: 'CLIENT',
+    };
+
+    const admin = {
+      id: 'admin-history-5',
+      email: 'admin-history-5@test.com',
+      role: 'ADMIN',
+    };
+
+    const request = service.create(
+      {
+        title: 'Tablet dañada',
+        description: 'La pantalla dejó de responder.',
+        deviceType: 'Tablet',
+        latitude: 20.6534,
+        longitude: -103.3496,
+      },
+      client,
+    );
+
+    const history = service.getHistory(request.id, admin);
+
+    expect(history).toHaveLength(1);
+  });
+
+  it('no debe permitir consultar el historial a otro cliente', () => {
+    const client = {
+      id: 'client-history-6',
+      email: 'client-history-6@test.com',
+      role: 'CLIENT',
+    };
+
+    const anotherClient = {
+      id: 'client-history-6-other',
+      email: 'client-history-6-other@test.com',
+      role: 'CLIENT',
+    };
+
+    const request = service.create(
+      {
+        title: 'Consola no enciende',
+        description: 'La consola dejó de encender.',
+        deviceType: 'Consola',
+        latitude: 20.6534,
+        longitude: -103.3496,
+      },
+      client,
+    );
+
+    expect(() => service.getHistory(request.id, anotherClient)).toThrowError(
+      ForbiddenException,
+    );
+  });
+
+  it('no debe permitir consultar el historial a otro técnico', () => {
+    const client = {
+      id: 'client-history-7',
+      email: 'client-history-7@test.com',
+      role: 'CLIENT',
+    };
+
+    const technician = {
+      id: 'tech-history-7',
+      email: 'tech-history-7@test.com',
+      role: 'TECHNICIAN',
+    };
+
+    const anotherTechnician = {
+      id: 'tech-history-7-other',
+      email: 'tech-history-7-other@test.com',
+      role: 'TECHNICIAN',
+    };
+
+    const request = service.create(
+      {
+        title: 'Impresora con falla',
+        description: 'La impresora no imprime.',
+        deviceType: 'Impresora',
+        latitude: 20.6534,
+        longitude: -103.3496,
+      },
+      client,
+    );
+
+    service.accept(request.id, technician);
+
+    expect(() =>
+      service.getHistory(request.id, anotherTechnician),
+    ).toThrowError(ForbiddenException);
+  });
+
+  it('debe lanzar NotFoundException al consultar el historial de una solicitud inexistente', () => {
+    const client = {
+      id: 'client-history-8',
+      email: 'client-history-8@test.com',
+      role: 'CLIENT',
+    };
+
+    expect(() =>
+      service.getHistory('123e4567-e89b-12d3-a456-426614174999', client),
+    ).toThrowError(NotFoundException);
+  });
 });
