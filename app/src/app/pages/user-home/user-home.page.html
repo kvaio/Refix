@@ -1,0 +1,127 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="light" style="--background: #ffffff; padding: 8px 16px;">
+    <ion-title slot="start">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <ion-icon name="hardware-chip-outline" style="color: #6c2bd9; font-size: 24px;"></ion-icon>
+        <div>
+          <strong style="font-size: 18px; color: #0f172a; display: block; line-height: 1;">ReFix</strong>
+          <span style="font-size: 11px; color: #64748b;">Panel de Usuario</span>
+        </div>
+      </div>
+    </ion-title>
+
+    <ion-buttons slot="end">
+      <div style="display: flex; align-items: center; gap: 12px; margin-right: 16px;">
+        <ion-avatar style="width: 32px; height: 32px;">
+          <div style="background: #6c2bd9; color: white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">JR</div>
+        </ion-avatar>
+        <span style="font-size: 13px; font-weight: 600; color: #0f172a;">Juan Rodríguez</span>
+      </div>
+      <ion-button routerLink="/login" fill="outline" color="danger" style="--border-radius: 10px; font-weight: 600;">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon> Salir
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding" style="--background: #f8fafc;">
+  
+  <!-- Estado de Solicitud Activa -->
+  <div style="background: #10b981; color: white; border-radius: 12px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600;">
+      <ion-icon name="checkmark-circle" style="font-size: 18px;"></ion-icon>
+      Sesión iniciada como Juan Rodríguez
+    </div>
+    <ion-button fill="clear" color="light" size="small" routerLink="/login">✕ Salir</ion-button>
+  </div>
+
+  <!-- Buscador y ChatBot de Usuario -->
+  <ion-grid style="padding: 0; margin-bottom: 24px;">
+    <ion-row>
+      <ion-col size="12" size-md="7">
+        <div class="metric-card">
+          <h3 style="margin: 0 0 4px 0; font-weight: 700; color: #0f172a;">Buscador</h3>
+          <p style="margin: 0 0 16px 0; font-size: 13px; color: #64748b;">Encuentra rápidamente el servicio o técnico que necesitas</p>
+
+          <ion-searchbar placeholder="¿Qué servicio necesitas? Ej: Reparación de laptop, plomería..." style="--border-radius: 12px; padding: 0; margin-bottom: 12px;"></ion-searchbar>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+            <ion-chip outline color="primary"><ion-label>⭐ Mejor valorados</ion-label></ion-chip>
+            <ion-chip outline color="medium"><ion-label>📍 Más cercanos</ion-label></ion-chip>
+            <ion-chip outline color="medium"><ion-label>💰 Menor precio</ion-label></ion-chip>
+            <ion-chip outline color="medium"><ion-label>⚡ Disponible ahora</ion-label></ion-chip>
+          </div>
+
+          <ion-list style="padding: 0;">
+            <ion-item style="--padding-start: 0; --border-color: #f1f5f9;">
+              <ion-avatar slot="start"><div style="background: #6c2bd9; color: white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700;">Ra</div></ion-avatar>
+              <ion-label>
+                <h2 style="font-weight: 700; font-size: 14px;">Ing. Ramírez</h2>
+                <p style="font-size: 12px;">Especialista en Laptops · 1.2 km · Q 200–400</p>
+              </ion-label>
+              <ion-badge color="warning" slot="end" style="margin-right: 8px;">★ 4.9</ion-badge>
+              <ion-button color="primary" slot="end" size="small" style="--border-radius: 8px;">Contactar</ion-button>
+            </ion-item>
+            
+            <ion-item style="--padding-start: 0; --border-color: #f1f5f9;">
+              <ion-avatar slot="start"><div style="background: #6c2bd9; color: white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700;">Ga</div></ion-avatar>
+              <ion-label>
+                <h2 style="font-weight: 700; font-size: 14px;">Téc. García</h2>
+                <p style="font-size: 12px;">Electricidad & Redes · 2.1 km · Q 150–300</p>
+              </ion-label>
+              <ion-badge color="warning" slot="end" style="margin-right: 8px;">★ 4.8</ion-badge>
+              <ion-button color="primary" slot="end" size="small" style="--border-radius: 8px;">Contactar</ion-button>
+            </ion-item>
+          </ion-list>
+        </div>
+      </ion-col>
+
+      <!-- ChatBot -->
+      <ion-col size="12" size-md="5">
+        <div style="background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); height: 100%; display: flex; flex-direction: column;">
+          <div style="background: #6c2bd9; color: white; padding: 12px 16px; display: flex; align-items: center; gap: 10px;">
+            <ion-icon name="bot-outline" style="font-size: 24px;"></ion-icon>
+            <div>
+              <strong style="font-size: 14px; display: block;">Chat Bot · ReFix Bot</strong>
+              <span style="font-size: 11px; opacity: 0.8;">🟢 En línea — respuesta inmediata</span>
+            </div>
+          </div>
+          <div style="padding: 16px; background: #f8fafc; flex: 1; display: flex; flex-direction: column; gap: 12px;">
+            <div style="background: white; padding: 10px 14px; border-radius: 12px; font-size: 13px; max-width: 85%; border: 1px solid #e2e8f0;">
+              Hola 👋 Soy ReFix Bot. ¿En qué puedo ayudarte hoy?
+            </div>
+            <div style="background: #6c2bd9; color: white; padding: 10px 14px; border-radius: 12px; margin-left: auto; font-size: 13px; max-width: 85%;">
+              Necesito un técnico para mi laptop
+            </div>
+            <div style="background: white; padding: 10px 14px; border-radius: 12px; font-size: 13px; max-width: 85%; border: 1px solid #e2e8f0;">
+              Entendido. ¿Cuál es el problema específico con tu laptop?
+            </div>
+          </div>
+          <div style="padding: 12px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 8px;">
+            <ion-input placeholder="Escribe tu consulta..." style="--padding-start: 12px; background: #f8fafc; border-radius: 10px; font-size: 13px;"></ion-input>
+            <ion-button color="primary" style="--border-radius: 10px;"><ion-icon name="send"></ion-icon></ion-button>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- Mapa de Técnicos Cercanos -->
+  <div class="metric-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <div>
+        <h3 style="margin: 0; font-weight: 700; color: #0f172a;">Mapa de Técnicos</h3>
+        <p style="margin: 2px 0 0 0; font-size: 12px; color: #16a34a; font-weight: 600;">🟢 6 técnicos disponibles cerca de tu ubicación</p>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <ion-button fill="outline" color="medium" size="small" style="--border-radius: 8px;">📍 Mi ubicación</ion-button>
+        <ion-button color="primary" size="small" style="--border-radius: 8px;">🔍 Buscar en área</ion-button>
+      </div>
+    </div>
+
+    <div style="background: #e0f2fe; height: 220px; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; border: 1px solid #bae6fd;">
+      <span style="color: #0284c7; font-weight: 600; font-size: 14px;">🗺️ Vista Interactiva del Mapa de Cobertura</span>
+    </div>
+  </div>
+
+</ion-content>

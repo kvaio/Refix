@@ -1,0 +1,51 @@
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+:root {
+  --ion-color-primary: #6c2bd9;
+  --ion-color-primary-rgb: 108, 43, 217;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #5f26bf;
+  --ion-color-primary-tint: #7b40dd;
+  --ion-background-color: #f8fafc;
+  --ion-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--ion-font-family);
+  background-color: #f8fafc;
+}
+
+/* Clases reutilizables del Prototipo */
+.purple-header-card {
+  background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
+  border-radius: 20px;
+  color: white;
+  padding: 36px 32px;
+  box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.3);
+}
+
+.metric-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+}
+
+.service-badge {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
