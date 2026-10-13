@@ -8,7 +8,10 @@ generator client {
   previewFeatures = ["postgresqlExtensions"]
 }
 
+// ================================
 // ENUMS
+// ================================
+
 enum Role {
   CLIENT
   TECHNICIAN
@@ -16,11 +19,17 @@ enum Role {
 }
 
 enum RequestStatus {
-  PENDING
-  ACCEPTED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
+  SOLICITADO
+  CANCELADO
+  AGENDADO
+  RECIBIDO
+  EN_PROCESO
+  ESPERANDO_PIEZA
+  LISTO_PARA_ENTREGA
+  ENTREGADO
+  EN_GARANTIA
+  RESUELTO
+  CERRADO
 }
 
 enum TradeInStatus {
@@ -30,7 +39,10 @@ enum TradeInStatus {
   COMPLETED
 }
 
-// TABLAS
+// ================================
+// USERS
+// ================================
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -42,12 +54,19 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   technicianProfile TechnicianProfile?
-  serviceRequests   ServiceRequest[]   @relation("ClientRequests")
+  serviceRequests   ServiceRequest[] @relation("ClientRequests")
   chatbotLogs       ChatbotLog[]
   tradeInEstimates  TradeInEstimate[]
+  assignedServices  ServiceRequest[] @relation("TechnicianServices")
+
+  statusHistoryEntries ServiceRequestStatusHistory[] @relation("StatusHistoryActor")
 
   @@map("users")
 }
+
+// ================================
+// TECHNICIANS
+// ================================
 
 model TechnicianProfile {
   id          String   @id @default(uuid())
@@ -61,11 +80,14 @@ model TechnicianProfile {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assignedServices ServiceRequest[] @relation("TechnicianServices")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("technician_profiles")
 }
+
+// ================================
+// CHATBOT
+// ================================
 
 model ChatbotLog {
   id             String   @id @default(uuid())
@@ -77,27 +99,68 @@ model ChatbotLog {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, createdAt])
   @@map("chatbot_logs")
 }
 
+// ================================
+// SERVICE REQUESTS
+// ================================
+
 model ServiceRequest {
-  id            String        @id @default(uuid())
-  clientId      String        @map("client_id")
-  technicianId  String?       @map("technician_id")
-  status        RequestStatus @default(PENDING)
+  id           String  @id @default(uuid())
+  clientId     String  @map("client_id")
+  technicianId String? @map("technician_id")
+
+  title         String        @db.VarChar(120)
   description   String        @db.Text
+  deviceType    String        @map("device_type") @db.VarChar(50)
+  latitude      Float
+  longitude     Float
+
+  status        RequestStatus @default(SOLICITADO)
   estimatedCost Float?        @map("estimated_cost")
   finalCost     Float?        @map("final_cost")
   scheduledAt   DateTime?     @map("scheduled_at")
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
-  client     User               @relation("ClientRequests", fields: [clientId], references: [id])
-  technician TechnicianProfile? @relation("TechnicianServices", fields: [technicianId], references: [id])
-  review     Review?
+  client     User  @relation("ClientRequests", fields: [clientId], references: [id])
+  technician User? @relation("TechnicianServices", fields: [technicianId], references: [id], onDelete: Restrict)
 
+  review        Review?
+  statusHistory ServiceRequestStatusHistory[]
+
+  @@index([clientId, createdAt])
+  @@index([technicianId, status])
+  @@index([status, createdAt])
   @@map("service_requests")
 }
+
+// ================================
+// SERVICE REQUEST STATUS HISTORY
+// ================================
+
+model ServiceRequestStatusHistory {
+  id               String        @id @default(uuid())
+  serviceRequestId String        @map("service_request_id")
+  previousStatus   RequestStatus? @map("previous_status")
+  newStatus        RequestStatus  @map("new_status")
+  actorId          String        @map("actor_id")
+  actorRole        Role          @map("actor_role")
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  serviceRequest ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  actor          User           @relation("StatusHistoryActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([serviceRequestId, createdAt])
+  @@index([actorId, createdAt])
+  @@map("service_request_status_history")
+}
+
+// ================================
+// TRADE-IN
+// ================================
 
 model TradeInEstimate {
   id             String        @id @default(uuid())
@@ -111,8 +174,13 @@ model TradeInEstimate {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, createdAt])
   @@map("trade_in_estimates")
 }
+
+// ================================
+// REVIEWS
+// ================================
 
 model Review {
   id               String   @id @default(uuid())
