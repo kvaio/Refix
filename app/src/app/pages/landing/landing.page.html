@@ -1,0 +1,170 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="light" style="--background: #ffffff; padding: 8px 16px;">
+    <ion-title slot="start">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <ion-icon name="hardware-chip-outline" style="color: #6c2bd9; font-size: 24px;"></ion-icon>
+        <div>
+          <strong style="font-size: 18px; color: #0f172a; display: block; line-height: 1;">ReFix</strong>
+          <span style="font-size: 11px; color: #64748b;">Plataforma de Servicios</span>
+        </div>
+      </div>
+    </ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button routerLink="/landing" color="primary" style="font-weight: 600;">Inicio</ion-button>
+      <ion-button color="dark">Servicios</ion-button>
+      <ion-button color="dark">Contacto</ion-button>
+      <ion-button routerLink="/register" color="primary" fill="clear">Registrarse</ion-button>
+      <ion-button routerLink="/login" fill="solid" color="primary" style="--border-radius: 12px; font-weight: 600;">
+        <ion-icon name="lock-closed" slot="start"></ion-icon> Iniciar Sesión
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding" style="--background: #f8fafc;">
+  <!-- Banner Principal Morado -->
+  <div class="purple-header-card" style="margin-bottom: 28px;">
+    <ion-grid>
+      <ion-row class="ion-align-items-center">
+        <ion-col size="12" size-lg="7">
+          <div class="service-badge" style="margin-bottom: 16px;">
+            🚀 Plataforma Líder en Servicios Técnicos
+          </div>
+          <h1 style="font-size: 34px; font-weight: 800; margin: 0 0 12px 0; line-height: 1.2;">
+            Encuentra el técnico perfecto para tu hogar
+          </h1>
+          <p style="font-size: 15px; opacity: 0.9; margin-bottom: 24px; max-width: 520px;">
+            Conectamos usuarios con técnicos certificados para servicios de laptops, electricidad, plomería y más. Rápido, confiable y seguro.
+          </p>
+
+          <div style="display: flex; gap: 12px;">
+            <ion-button routerLink="/register" fill="solid" color="light" style="--color: #5b21b6; --border-radius: 10px; font-weight: 700;">
+              Comenzar ahora →
+            </ion-button>
+            <ion-button fill="outline" color="light" style="--border-radius: 10px; font-weight: 600;">
+              Ver servicios
+            </ion-button>
+          </div>
+        </ion-col>
+
+        <!-- Stats flotantes -->
+        <ion-col size="12" size-lg="5">
+          <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <div style="background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); padding: 16px; border-radius: 14px; text-align: center; flex: 1;">
+              <h2 style="margin:0; font-weight:800; font-size: 22px;">2,400+</h2>
+              <p style="margin:4px 0 0 0; font-size:12px; opacity:0.8;">Técnicos activos</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); padding: 16px; border-radius: 14px; text-align: center; flex: 1;">
+              <h2 style="margin:0; font-weight:800; font-size: 22px;">98%</h2>
+              <p style="margin:4px 0 0 0; font-size:12px; opacity:0.8;">Satisfacción</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); padding: 16px; border-radius: 14px; text-align: center; flex: 1;">
+              <h2 style="margin:0; font-weight:800; font-size: 22px;">15,000+</h2>
+              <p style="margin:4px 0 0 0; font-size:12px; opacity:0.8;">Servicios realizados</p>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <!-- Parrilla de Servicios -->
+  <div style="margin-bottom: 32px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <div>
+        <h3 style="margin: 0; font-weight: 700; color: #0f172a;">Servicios</h3>
+        <p style="margin: 2px 0 0 0; font-size: 13px; color: #64748b;">Elige el tipo de servicio que necesitas</p>
+      </div>
+      <a style="color: #6c2bd9; font-weight: 600; font-size: 13px; text-decoration: none;" href="#">Ver todos los servicios →</a>
+    </div>
+
+    <ion-grid style="padding: 0;">
+      <ion-row>
+        <ion-col size="4" size-md="2">
+          <div class="metric-card" style="text-align: center;">
+            <ion-icon name="snow-outline" style="font-size: 28px; color: #38bdf8;"></ion-icon>
+            <h4 style="margin: 8px 0 2px 0; font-size: 13px;">Climatización</h4>
+            <span style="font-size: 11px; color: #94a3b8;">24 técnicos</span>
+          </div>
+        </ion-col>
+        <ion-col size="4" size-md="2">
+          <div class="metric-card" style="text-align: center;">
+            <ion-icon name="build-outline" style="font-size: 28px; color: #818cf8;"></ion-icon>
+            <h4 style="margin: 8px 0 2px 0; font-size: 13px;">Plomería</h4>
+            <span style="font-size: 11px; color: #94a3b8;">18 técnicos</span>
+          </div>
+        </ion-col>
+        <ion-col size="4" size-md="2">
+          <div class="metric-card" style="text-align: center;">
+            <ion-icon name="flash-outline" style="font-size: 28px; color: #f59e0b;"></ion-icon>
+            <h4 style="margin: 8px 0 2px 0; font-size: 13px;">Electricidad</h4>
+            <span style="font-size: 11px; color: #94a3b8;">31 técnicos</span>
+          </div>
+        </ion-col>
+        <ion-col size="4" size-md="2">
+          <div class="metric-card" style="text-align: center;">
+            <ion-icon name="laptop-outline" style="font-size: 28px; color: #a855f7;"></ion-icon>
+            <h4 style="margin: 8px 0 2px 0; font-size: 13px;">Laptops</h4>
+            <span style="font-size: 11px; color: #94a3b8;">22 técnicos</span>
+          </div>
+        </ion-col>
+        <ion-col size="4" size-md="2">
+          <div class="metric-card" style="text-align: center;">
+            <ion-icon name="color-palette-outline" style="font-size: 28px; color: #ec4899;"></ion-icon>
+            <h4 style="margin: 8px 0 2px 0; font-size: 13px;">Pintura</h4>
+            <span style="font-size: 11px; color: #94a3b8;">15 técnicos</span>
+          </div>
+        </ion-col>
+        <ion-col size="4" size-md="2">
+          <div class="metric-card" style="text-align: center;">
+            <ion-icon name="wifi-outline" style="font-size: 28px; color: #10b981;"></ion-icon>
+            <h4 style="margin: 8px 0 2px 0; font-size: 13px;">Internet</h4>
+            <span style="font-size: 11px; color: #94a3b8;">19 técnicos</span>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <!-- Buscador y Chatbot -->
+  <ion-grid style="padding: 0; margin-bottom: 32px;">
+    <ion-row>
+      <ion-col size="12" size-md="7">
+        <div class="metric-card">
+          <h3 style="margin: 0 0 4px 0; font-weight: 700;">Buscador</h3>
+          <p style="margin: 0 0 16px 0; font-size: 13px; color: #64748b;">Encuentra rápidamente el servicio o técnico que necesitas</p>
+
+          <ion-searchbar placeholder="¿Qué servicio necesitas? Ej: Reparación de laptop..." style="--border-radius: 12px; padding: 0; margin-bottom: 12px;"></ion-searchbar>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <ion-chip outline color="primary"><ion-label>⭐ Mejor valorados</ion-label></ion-chip>
+            <ion-chip outline color="medium"><ion-label>📍 Más cercanos</ion-label></ion-chip>
+            <ion-chip outline color="medium"><ion-label>💰 Menor precio</ion-label></ion-chip>
+          </div>
+        </div>
+      </ion-col>
+
+      <!-- ChatBot Widget -->
+      <ion-col size="12" size-md="5">
+        <div style="background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+          <div style="background: #6c2bd9; color: white; padding: 12px 16px; display: flex; align-items: center; gap: 10px;">
+            <ion-icon name="bot-outline" style="font-size: 24px;"></ion-icon>
+            <div>
+              <strong style="font-size: 14px; display: block;">Chat Bot · ReFix Bot</strong>
+              <span style="font-size: 11px; opacity: 0.8;">🟢 En línea — respuesta inmediata</span>
+            </div>
+          </div>
+          <div style="padding: 16px; background: #f8fafc; min-height: 140px;">
+            <div style="background: white; padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; font-size: 13px; max-width: 80%; border: 1px solid #e2e8f0;">
+              Hola 👋 Soy ReFix Bot. ¿En qué puedo ayudarte hoy?
+            </div>
+            <div style="background: #6c2bd9; color: white; padding: 10px 14px; border-radius: 12px; margin-left: auto; font-size: 13px; max-width: 80%; text-align: right;">
+              Necesito un técnico para mi laptop
+            </div>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
