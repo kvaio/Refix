@@ -1,0 +1,84 @@
+﻿<ion-content class="ion-padding">
+  <ion-grid class="full-height">
+    <ion-row class="full-height ion-align-items-center ion-justify-content-center">
+      <ion-col size="12" size-md="6" size-lg="5">
+        <div class="form-container">
+          <ion-button fill="clear" routerLink="/landing" size="small">
+            <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+            Volver al inicio
+          </ion-button>
+
+          <h2 class="ion-no-margin ion-margin-top">Crear cuenta en ReFix</h2>
+          <p class="ion-color-medium">
+            ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
+          </p>
+
+          <form (ngSubmit)="onRegister()" #registerForm="ngForm">
+            <ion-item fill="outline" class="ion-margin-top">
+              <ion-label position="floating">Nombre completo</ion-label>
+              <ion-input
+                name="name"
+                [(ngModel)]="name"
+                type="text"
+                autocomplete="name"
+                required
+                minlength="2"
+                maxlength="100">
+              </ion-input>
+            </ion-item>
+
+            <ion-item fill="outline" class="ion-margin-top">
+              <ion-label position="floating">Correo electrónico</ion-label>
+              <ion-input
+                name="email"
+                [(ngModel)]="email"
+                type="email"
+                autocomplete="email"
+                required
+                email
+                maxlength="254">
+              </ion-input>
+            </ion-item>
+
+            <ion-item fill="outline" class="ion-margin-top">
+              <ion-label position="floating">Contraseña (mínimo 8 caracteres)</ion-label>
+              <ion-input
+                name="password"
+                [(ngModel)]="password"
+                type="password"
+                autocomplete="new-password"
+                required
+                minlength="8"
+                maxlength="72">
+              </ion-input>
+            </ion-item>
+
+            <ion-item fill="outline" class="ion-margin-top">
+              <ion-label position="floating">Teléfono (opcional)</ion-label>
+              <ion-input
+                name="phone"
+                [(ngModel)]="phone"
+                type="tel"
+                autocomplete="tel"
+                maxlength="30">
+              </ion-input>
+            </ion-item>
+
+            <ion-text color="danger" *ngIf="errorMessage">
+              <p role="alert" class="ion-padding-top">{{ errorMessage }}</p>
+            </ion-text>
+
+            <ion-button
+              expand="block"
+              color="primary"
+              class="ion-margin-top"
+              type="submit"
+              [disabled]="registerForm.invalid || isLoading">
+              {{ isLoading ? 'Creando cuenta...' : 'Crear cuenta →' }}
+            </ion-button>
+          </form>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

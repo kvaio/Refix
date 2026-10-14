@@ -14,12 +14,18 @@ async function bootstrap() {
 
   app.use(helmet());
 
+  const rawCorsOrigin = configService.getOrThrow<string>('security.corsOrigin');
+  const corsOrigins = rawCorsOrigin
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
   app.enableCors({
-    origin: configService.getOrThrow<string>(
-      'security.corsOrigin',
-    ),
+    origin: corsOrigins,
     credentials: true,
   });
+
+
+
 
   app.useGlobalFilters(new HttpExceptionFilter());
 

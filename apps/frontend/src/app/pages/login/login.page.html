@@ -1,0 +1,103 @@
+﻿<ion-content style="--background: #09090b;">
+  <ion-grid style="padding: 0; min-height: 100%;">
+    <ion-row style="min-height: 100%;">
+
+      <ion-col size="12" size-md="5"
+        style="background: #09090b; color: white; padding: 48px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 48px;">
+            <ion-icon name="hardware-chip-outline" style="color: #8b5cf6; font-size: 28px;"></ion-icon>
+            <strong style="font-size: 20px;">ReFix</strong>
+          </div>
+
+          <h1 style="font-size: 36px; font-weight: 800; line-height: 1.2; margin-bottom: 16px;">
+            Bienvenido de vuelta
+          </h1>
+          <p style="color: #a1a1aa; font-size: 15px; line-height: 1.5; margin-bottom: 36px;">
+            Accede a tu cuenta para gestionar servicios y conectar con profesionales.
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <div style="background: #18181b; padding: 10px; border-radius: 10px; color: #f59e0b;">
+                <ion-icon name="flash-outline"></ion-icon>
+              </div>
+              <div>
+                <strong style="font-size: 14px; display: block;">Atención ágil</strong>
+                <span style="font-size: 12px; color: #71717a;">Gestiona tus solicitudes desde tu cuenta</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <div style="background: #18181b; padding: 10px; border-radius: 10px; color: #3b82f6;">
+                <ion-icon name="shield-checkmark-outline"></ion-icon>
+              </div>
+              <div>
+                <strong style="font-size: 14px; display: block;">Tu cuenta ReFix</strong>
+                <span style="font-size: 12px; color: #71717a;">Acceso personalizado según tu perfil</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size: 12px; color: #52525b;">
+          © 2026 ReFix · Plataforma de Servicios Técnicos
+        </div>
+      </ion-col>
+
+      <ion-col size="12" size-md="7"
+        style="background: #f8fafc; padding: 24px; display: flex; align-items: center; justify-content: center;">
+        <div
+          style="width: 100%; max-width: 440px; background: white; padding: 36px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,.05); border: 1px solid #f1f5f9;">
+
+          <a routerLink="/landing"
+            style="color: #64748b; font-size: 13px; text-decoration: none; display: inline-block; margin-bottom: 20px;">
+            ← Volver al inicio
+          </a>
+
+          <h2 style="font-size: 24px; font-weight: 800; margin: 0 0 4px; color: #0f172a;">
+            Iniciar sesión
+          </h2>
+          <p style="font-size: 13px; color: #64748b; margin: 0 0 24px;">
+            ¿No tienes cuenta?
+            <a routerLink="/register" style="color: #6c2bd9; font-weight: 600; text-decoration: none;">Regístrate
+              gratis</a>
+          </p>
+
+          <form (ngSubmit)="onLogin()" #loginForm="ngForm" novalidate>
+            <div style="margin-bottom: 16px;">
+              <label for="login-email"
+                style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 6px;">
+                CORREO ELECTRÓNICO
+              </label>
+              <ion-input id="login-email" name="email" type="email" [(ngModel)]="email" placeholder="correo@ejemplo.com"
+                autocomplete="email" required email
+                style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; --padding-start: 12px;">
+              </ion-input>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <label for="login-password"
+                style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 6px;">
+                CONTRASEÑA
+              </label>
+              <ion-input id="login-password" name="password" type="password" [(ngModel)]="password"
+                placeholder="Tu contraseña" autocomplete="current-password" required
+                style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; --padding-start: 12px;">
+              </ion-input>
+            </div>
+
+            <ion-text color="danger" *ngIf="errorMessage">
+              <p role="alert" style="font-size: 13px; margin: 0 0 16px;">{{ errorMessage }}</p>
+            </ion-text>
+
+            <ion-button expand="block" type="submit" [disabled]="loginForm.invalid || isLoading"
+              style="--border-radius: 12px; font-weight: 700; margin: 0 0 20px;">
+              {{ isLoading ? 'Iniciando sesión...' : 'Entrar →' }}
+            </ion-button>
+          </form>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
