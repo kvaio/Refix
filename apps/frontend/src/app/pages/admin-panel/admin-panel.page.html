@@ -1,35 +1,47 @@
 <ion-content style="--background: #f8fafc;">
   <div style="display: flex; min-height: 100vh;">
-    
+
     <!-- Sidebar Oscura de Administración -->
-    <div style="width: 250px; background: #0f172a; color: white; padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between;">
+    <div
+      style="width: 250px; background: #0f172a; color: white; padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between;">
       <div>
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 28px; padding-left: 8px;">
           <ion-icon name="hardware-chip-outline" style="color: #a855f7; font-size: 24px;"></ion-icon>
           <div>
             <strong style="font-size: 16px; display: block;">ReFix</strong>
-            <span style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Panel Admin</span>
+            <span style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Panel
+              Admin</span>
           </div>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 6px;">
-          <ion-button fill="solid" color="primary" style="--border-radius: 10px; justify-content: flex-start; --padding-start: 12px; font-size: 13px;">
+
+          <ion-button fill="solid" color="primary"
+            style="--border-radius: 10px; justify-content: flex-start; --padding-start: 12px; font-size: 13px;">
             <ion-icon name="grid-outline" slot="start"></ion-icon> Dashboard General
           </ion-button>
-          <ion-button fill="clear" color="light" style="justify-content: flex-start; --padding-start: 12px; font-size: 13px;">
+
+          <ion-button fill="clear" color="light"
+            style="justify-content: flex-start; --padding-start: 12px; font-size: 13px;">
             <ion-icon name="people-outline" slot="start"></ion-icon> Gestión de Usuarios
           </ion-button>
-          <ion-button fill="clear" color="light" style="justify-content: flex-start; --padding-start: 12px; font-size: 13px;">
+
+          <ion-button fill="clear" color="light"
+            style="justify-content: flex-start; --padding-start: 12px; font-size: 13px;">
             <ion-icon name="build-outline" slot="start"></ion-icon> Aprobar Técnicos
           </ion-button>
-          <ion-button fill="clear" color="light" style="justify-content: flex-start; --padding-start: 12px; font-size: 13px;">
+
+          <ion-button fill="clear" color="light"
+            style="justify-content: flex-start; --padding-start: 12px; font-size: 13px;">
             <ion-icon name="cash-outline" slot="start"></ion-icon> Transacciones
           </ion-button>
+          
         </div>
       </div>
 
-      <ion-button routerLink="/login" fill="clear" color="danger" style="justify-content: flex-start; font-size: 13px;">
-        <ion-icon name="log-out-outline" slot="start"></ion-icon> Cerrar Sesión
+      <ion-button (click)="logout()" fill="clear" color="danger" style="justify-content: flex-start; font-size: 13px;">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Cerrar Sesión
       </ion-button>
     </div>
 
@@ -40,7 +52,8 @@
           <h2 style="margin: 0; font-weight: 800; color: #0f172a; font-size: 24px;">Resumen Administrativo</h2>
           <span style="font-size: 12px; color: #64748b;">Monitoreo en tiempo real de la plataforma ReFix</span>
         </div>
-        <ion-badge color="primary" style="padding: 8px 12px; border-radius: 8px; font-size: 12px;">Sistema Operativo 100%</ion-badge>
+        <ion-badge color="primary" style="padding: 8px 12px; border-radius: 8px; font-size: 12px;">Sistema Operativo
+          100%</ion-badge>
       </div>
 
       <!-- Métricas Globales -->
@@ -82,7 +95,11 @@
         <h3 style="margin: 0 0 16px 0; font-weight: 700; color: #0f172a;">Técnicos Pendientes de Aprobación</h3>
         <ion-list style="padding: 0;">
           <ion-item style="--padding-start: 0; --border-color: #f1f5f9;">
-            <ion-avatar slot="start"><div style="background: #a855f7; color: white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700;">MP</div></ion-avatar>
+            <ion-avatar slot="start">
+              <div
+                style="background: #a855f7; color: white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                MP</div>
+            </ion-avatar>
             <ion-label>
               <h2 style="font-weight: 700;">Mario Paredes</h2>
               <p>Técnico en Climatización y Refrigeración · Documentación cargada</p>

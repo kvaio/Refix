@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-admin-panel',
@@ -6,11 +9,14 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./admin-panel.page.scss'],
   standalone: false,
 })
-export class AdminPanelPage implements OnInit {
+export class AdminPanelPage {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router,
+  ) {}
 
-  constructor() { }
-
-  ngOnInit() {
+  logout(): void {
+    this.authService.logout();
+    void this.router.navigateByUrl('/login', { replaceUrl: true });
   }
-
 }

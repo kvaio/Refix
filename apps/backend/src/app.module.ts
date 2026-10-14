@@ -10,6 +10,7 @@ import { ServiceRequestsModule } from './modules/service-requests/service-reques
 import { PrismaModule } from './prisma/prisma.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth/jwt-auth.guard';
+import { RolesGuard } from './modules/auth/guards/roles/roles.guard';
 
 @Module({
   
@@ -33,6 +34,10 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth/jwt-auth.guard';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })
