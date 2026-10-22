@@ -44,20 +44,34 @@ enum TradeInStatus {
 // ================================
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
-  phone     String?
-  role      Role     @default(CLIENT)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String
+  name            String
+  firstNames      String?   @map("first_names")
+  paternalSurname String?   @map("paternal_surname")
+  maternalSurname String?   @map("maternal_surname")
+  birthDate       DateTime? @map("birth_date") @db.Date
+  sex             String?
+  street          String?
+  exteriorNumber  String?   @map("exterior_number")
+  interiorNumber  String?   @map("interior_number")
+  neighborhood    String?
+  municipality    String?
+  state           String?
+  postalCode      String?   @map("postal_code")
+  phone           String?
+  role            Role      @default(CLIENT)
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  technicianProfile TechnicianProfile?
-  serviceRequests   ServiceRequest[] @relation("ClientRequests")
-  chatbotLogs       ChatbotLog[]
-  tradeInEstimates  TradeInEstimate[]
-  assignedServices  ServiceRequest[] @relation("TechnicianServices")
+  technicianProfile   TechnicianProfile?
+  serviceRequests     ServiceRequest[]   @relation("ClientRequests")
+  chatbotLogs         ChatbotLog[]
+  tradeInEstimates    TradeInEstimate[]
+  assignedServices    ServiceRequest[]   @relation("TechnicianServices")
+  sentServiceMessages ServiceMessage[]   @relation("ServiceMessageSender")
 
   statusHistoryEntries ServiceRequestStatusHistory[] @relation("StatusHistoryActor")
 
@@ -69,16 +83,19 @@ model User {
 // ================================
 
 model TechnicianProfile {
-  id          String   @id @default(uuid())
-  userId      String   @unique @map("user_id")
-  bio         String?  @db.Text
-  address     String?
-  isAvailable Boolean  @default(true) @map("is_available")
-  rating      Float    @default(0.0)
-  latitude    Float
-  longitude   Float
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id              String   @id @default(uuid())
+  userId          String   @unique @map("user_id")
+  bio             String?  @db.Text
+  profession      String?
+  yearsExperience Int?     @map("years_experience")
+  certifications  String?  @db.Text
+  address         String?
+  isAvailable     Boolean  @default(true) @map("is_available")
+  rating          Float    @default(0.0)
+  latitude        Float?
+  longitude       Float?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -92,7 +109,7 @@ model TechnicianProfile {
 model ChatbotLog {
   id             String   @id @default(uuid())
   userId         String   @map("user_id")
-  inputText      String   @db.Text @map("input_text")
+  inputText      String   @map("input_text") @db.Text
   predictedIssue String   @map("predicted_issue")
   confidence     Float
   createdAt      DateTime @default(now()) @map("created_at")
@@ -112,11 +129,12 @@ model ServiceRequest {
   clientId     String  @map("client_id")
   technicianId String? @map("technician_id")
 
-  title         String        @db.VarChar(120)
-  description   String        @db.Text
-  deviceType    String        @map("device_type") @db.VarChar(50)
-  latitude      Float
-  longitude     Float
+  title          String  @db.VarChar(120)
+  description    String  @db.Text
+  deviceType     String  @map("device_type") @db.VarChar(50)
+  serviceAddress String? @map("service_address") @db.VarChar(500)
+  latitude       Float?
+  longitude      Float?
 
   status        RequestStatus @default(SOLICITADO)
   estimatedCost Float?        @map("estimated_cost")
@@ -130,6 +148,7 @@ model ServiceRequest {
 
   review        Review?
   statusHistory ServiceRequestStatusHistory[]
+  messages      ServiceMessage[]
 
   @@index([clientId, createdAt])
   @@index([technicianId, status])
@@ -137,18 +156,33 @@ model ServiceRequest {
   @@map("service_requests")
 }
 
+model ServiceMessage {
+  id               String   @id @default(uuid())
+  serviceRequestId String   @map("service_request_id")
+  senderId         String   @map("sender_id")
+  body             String   @db.VarChar(2000)
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  serviceRequest ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  sender         User           @relation("ServiceMessageSender", fields: [senderId], references: [id], onDelete: Restrict)
+
+  @@index([serviceRequestId, createdAt])
+  @@index([senderId, createdAt])
+  @@map("service_messages")
+}
+
 // ================================
 // SERVICE REQUEST STATUS HISTORY
 // ================================
 
 model ServiceRequestStatusHistory {
-  id               String        @id @default(uuid())
-  serviceRequestId String        @map("service_request_id")
+  id               String         @id @default(uuid())
+  serviceRequestId String         @map("service_request_id")
   previousStatus   RequestStatus? @map("previous_status")
   newStatus        RequestStatus  @map("new_status")
-  actorId          String        @map("actor_id")
-  actorRole        Role          @map("actor_role")
-  createdAt        DateTime      @default(now()) @map("created_at")
+  actorId          String         @map("actor_id")
+  actorRole        Role           @map("actor_role")
+  createdAt        DateTime       @default(now()) @map("created_at")
 
   serviceRequest ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
   actor          User           @relation("StatusHistoryActor", fields: [actorId], references: [id], onDelete: Restrict)

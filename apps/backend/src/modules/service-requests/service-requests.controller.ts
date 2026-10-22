@@ -27,6 +27,8 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles/roles.guard';
 
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
+import { CreateServiceMessageDto } from './dto/create-service-message.dto';
+import { CreateServiceReviewDto } from './dto/create-service-review.dto';
 import { UpdateServiceRequestStatusDto } from './dto/update-service-request-status.dto';
 import { ServiceRequestsService } from './service-requests.service';
 
@@ -137,6 +139,48 @@ export class ServiceRequestsController {
     @Req() req: AuthenticatedRequest,
   ) {
     return this.serviceRequestsService.getHistory(id, req.user);
+  }
+
+  @Patch(':id/cancel')
+  @Roles('CLIENT')
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Cancelar una solicitud que aún no ha sido aceptada' })
+  cancel(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.serviceRequestsService.cancel(id, req.user);
+  }
+
+  @Get(':id/messages')
+  @ApiOperation({ summary: 'Obtener la conversación de una solicitud asignada' })
+  getMessages(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.serviceRequestsService.getMessages(id, req.user);
+  }
+
+  @Post(':id/messages')
+  @ApiOperation({ summary: 'Enviar un mensaje al otro participante de la solicitud' })
+  sendMessage(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: CreateServiceMessageDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.serviceRequestsService.sendMessage(id, dto, req.user);
+  }
+
+  @Post(':id/review')
+  @Roles('CLIENT')
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Dejar una reseña después de la entrega del servicio' })
+  createReview(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: CreateServiceReviewDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.serviceRequestsService.createReview(id, dto, req.user);
   }
 
   @Patch(':id/accept')

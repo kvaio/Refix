@@ -1,9 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsOptional,
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
   IsString,
+  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -44,17 +46,30 @@ export class CreateServiceRequestDto {
   @MaxLength(50)
   deviceType: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({ maxLength: 500, description: 'Domicilio donde se requiere el servicio. Si se omite, se usa el domicilio del cliente.' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  serviceAddress?: string;
+
+  @ApiPropertyOptional({ description: 'Identificador del técnico elegido por el cliente.' })
+  @IsOptional()
+  @IsUUID()
+  technicianId?: string;
+
+  @ApiPropertyOptional({
     example: 20.6534,
     description: 'Latitud de la ubicación del cliente.',
   })
+  @IsOptional()
   @IsLatitude()
-  latitude: number;
+  latitude?: number;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: -103.3496,
     description: 'Longitud de la ubicación del cliente.',
   })
+  @IsOptional()
   @IsLongitude()
-  longitude: number;
+  longitude?: number;
 }

@@ -37,7 +37,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Usuario no encontrado');
+      throw new UnauthorizedException('La cuenta no existe o está suspendida');
     }
 
     return {

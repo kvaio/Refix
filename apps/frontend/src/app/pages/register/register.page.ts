@@ -1,4 +1,4 @@
-﻿import { Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -10,12 +10,30 @@ import { AuthService } from '../../services/auth.service';
   standalone: false,
 })
 export class RegisterPage {
-  name = '';
+  role: 'CLIENT' | 'TECHNICIAN' = 'CLIENT';
+  firstNames = '';
+  paternalSurname = '';
+  maternalSurname = '';
+  birthDate = '';
+  sex = '';
   email = '';
   password = '';
   phone = '';
+  street = '';
+  exteriorNumber = '';
+  interiorNumber = '';
+  neighborhood = '';
+  municipality = '';
+  state = '';
+  postalCode = '';
+  profession = '';
+  yearsExperience: number | null = null;
+  certifications = '';
+  technicianBio = '';
   errorMessage = '';
   isLoading = false;
+
+  readonly maxBirthDate = this.adultBirthDateLimit();
 
   constructor(
     private readonly authService: AuthService,
@@ -24,19 +42,51 @@ export class RegisterPage {
 
   onRegister(): void {
     if (this.isLoading) return;
+    if (this.birthDate > this.maxBirthDate) {
+      this.errorMessage = 'Debes tener al menos 18 años para crear una cuenta.';
+      return;
+    }
+    if (this.role === 'TECHNICIAN' && this.yearsExperience === null) {
+      this.errorMessage = 'Completa tus datos profesionales.';
+      return;
+    }
 
     this.errorMessage = '';
     this.isLoading = true;
 
     this.authService.register({
-      name: this.name.trim(),
+      firstNames: this.firstNames.trim(),
+      paternalSurname: this.paternalSurname.trim(),
+      maternalSurname: this.maternalSurname.trim(),
+      birthDate: this.birthDate,
+      sex: this.sex,
       email: this.email.trim(),
       password: this.password,
+      role: this.role,
       ...(this.phone.trim() ? { phone: this.phone.trim() } : {}),
+      street: this.street.trim(),
+      exteriorNumber: this.exteriorNumber.trim(),
+      ...(this.interiorNumber.trim() ? { interiorNumber: this.interiorNumber.trim() } : {}),
+      neighborhood: this.neighborhood.trim(),
+      municipality: this.municipality.trim(),
+      state: this.state.trim(),
+      ...(this.postalCode.trim() ? { postalCode: this.postalCode.trim() } : {}),
+      ...(this.role === 'TECHNICIAN'
+        ? {
+            technicianProfile: {
+              profession: this.profession.trim(),
+              yearsExperience: this.yearsExperience as number,
+              ...(this.certifications.trim() ? { certifications: this.certifications.trim() } : {}),
+              bio: this.technicianBio.trim(),
+            },
+          }
+        : {}),
     }).subscribe({
-      next: () => {
+      next: (response) => {
         this.isLoading = false;
-        void this.router.navigate(['/user-home']);
+        void this.router.navigate([
+          response.user.role === 'TECHNICIAN' ? '/technician-panel' : '/user-home',
+        ]);
       },
       error: (error: HttpErrorResponse) => {
         this.isLoading = false;
@@ -55,5 +105,13 @@ export class RegisterPage {
         }
       },
     });
+  }
+
+  private adultBirthDateLimit(): string {
+    const today = new Date();
+    const year = today.getFullYear() - 18;
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

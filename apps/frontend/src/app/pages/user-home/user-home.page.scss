@@ -1,0 +1,229 @@
+
+.coverage-map {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  background: #e0f2fe;
+}
+
+.coverage-map-tiles {
+  position: absolute;
+  width: 1280px;
+  height: 768px;
+  pointer-events: none;
+}
+
+.coverage-map-tile {
+  position: absolute;
+  display: block;
+  width: 256px;
+  height: 256px;
+  max-width: none;
+}
+
+.coverage-map-user-marker {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #6c2bd9;
+  box-shadow: 0 1px 8px rgb(15 23 42 / 55%);
+}
+
+.coverage-map-user-marker span {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.coverage-map-message {
+  position: absolute;
+  z-index: 3;
+  bottom: 28px;
+  left: 12px;
+  display: flex;
+  max-width: min(420px, calc(100% - 24px));
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 96%);
+  color: #334155;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 12%);
+}
+
+.coverage-map-message a,
+.coverage-map-attribution {
+  color: #334155;
+  text-decoration: none;
+}
+
+.coverage-map-attribution {
+  position: absolute;
+  z-index: 3;
+  right: 0;
+  bottom: 0;
+  padding: 3px 6px;
+  background: rgb(255 255 255 / 90%);
+  font-size: 10px;
+}
+
+.technicians-loading,
+.technicians-error,
+.technicians-empty,
+.coverage-map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px;
+  color: #64748b;
+  text-align: center;
+}
+.technicians-error { color: #991b1b; }
+.technicians-empty {
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+.technician-avatar {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background: #6c2bd9;
+  color: #fff;
+  font-weight: 700;
+}
+.coverage-map-loading {
+  position: absolute;
+  z-index: 1;
+  top: 10px;
+  right: 10px;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 94%);
+  box-shadow: 0 1px 5px rgb(15 23 42 / 15%);
+}
+
+
+.technician-profile-modal {
+  --width: min(560px, calc(100% - 24px));
+  --height: min(680px, calc(100% - 32px));
+  --border-radius: 18px;
+}
+
+.technician-profile-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.technician-profile-heading ion-avatar {
+  width: 64px;
+  height: 64px;
+}
+
+.technician-profile-heading h2 {
+  margin: 0 0 4px;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.technician-profile-heading p,
+.technician-profile-section p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.technician-profile-rating {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  color: #334155;
+  font-weight: 600;
+}
+
+.client-services { margin-bottom: 24px; }
+.client-services-heading, .client-request-top, .client-request-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.client-services-heading { margin-bottom: 16px; }
+.client-services-heading h2 { margin: 0; color: #0f172a; font-size: 20px; }
+.client-services-heading p { margin: 5px 0 0; color: #64748b; font-size: 13px; }
+.client-request-list { display: grid; gap: 12px; }
+.client-request-card { padding: 16px; border: 1px solid #e2e8f0; border-radius: 14px; background: #fff; }
+.client-request-top { align-items: flex-start; }
+.client-request-top h3 { margin: 9px 0 0; color: #172033; font-size: 16px; }
+.client-request-top time, .history-entry time { color: #7b8798; font-size: 11px; }
+.service-status { display: inline-flex; padding: 4px 9px; border-radius: 20px; background: #f0eaff; color: #6041c5; font-size: 11px; font-weight: 700; }
+.service-status[data-status='CANCELADO'] { background: #fff0f0; color: #a33434; }
+.service-status[data-status='CERRADO'], .service-status[data-status='RESUELTO'] { background: #e7f8ef; color: #16844c; }
+.client-request-details { display: grid; gap: 6px; margin-top: 12px; color: #68758a; font-size: 12px; }
+.client-request-details span { display: flex; align-items: flex-start; gap: 6px; }
+.client-request-details ion-icon { flex: 0 0 auto; }
+.assigned-technician { display: flex; align-items: center; gap: 9px; margin-top: 12px; padding: 10px; border-radius: 10px; background: #f7f6ff; color: #5f45be; }
+.assigned-technician > span, .assigned-technician small { display: block; }
+.assigned-technician small { margin-top: 3px; color: #7a8292; font-size: 11px; }
+.client-request-actions { justify-content: flex-start; flex-wrap: wrap; margin-top: 12px; }
+.review-saved { color: #907018; font-size: 12px; }
+.request-history { display: grid; gap: 9px; margin-top: 14px; padding: 12px; border-radius: 10px; background: #f8fafc; }
+.history-entry { display: flex; align-items: center; gap: 8px; color: #39465a; font-size: 12px; }
+.history-entry time { margin-left: auto; }
+.history-dot { width: 7px; height: 7px; border-radius: 50%; background: #7455dc; }
+.service-notice { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; padding: 10px 12px; border-radius: 9px; font-size: 12px; }
+.service-notice-success { background: #eaf8ef; color: #1c7744; }
+.service-notice-error { background: #fff0f0; color: #a33434; }
+.service-loading, .interaction-loading { display: flex; align-items: center; gap: 9px; padding: 14px 0; color: #718096; font-size: 13px; }
+.service-empty, .interaction-empty { padding: 16px; color: #718096; font-size: 13px; text-align: center; }
+.interaction-modal-content { --background: #f8fafc; }
+.selected-tech-note, .chat-request-title { padding: 12px; border-radius: 10px; background: #f0eaff; color: #514287; font-size: 13px; }
+.address-help, .technician-unavailable-note { margin: 6px 4px 12px; color: #718096; font-size: 11px; }
+.request-technician-button { margin-top: 24px; }
+.rating-picker { display: flex; gap: 8px; margin: 14px 0; }
+.rating-picker button { border: 0; background: transparent; color: #c4cad4; font-size: 34px; cursor: pointer; }
+.rating-picker button.active { color: #f4ad23; }
+.interaction-error { color: #a33434; font-size: 12px; }
+.interaction-messages { display: grid; gap: 10px; padding-bottom: 14px; }
+.interaction-message { max-width: 84%; padding: 10px 12px; border-radius: 12px 12px 12px 3px; background: #fff; box-shadow: 0 2px 8px #16233b0a; }
+.interaction-message.own-message { justify-self: end; border-radius: 12px 12px 3px 12px; background: #eee9ff; }
+.interaction-message small, .interaction-message time { display: block; color: #768196; font-size: 10px; }
+.interaction-message p { margin: 5px 0; color: #293449; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.interaction-composer { display: flex; align-items: flex-end; gap: 8px; padding-top: 10px; border-top: 1px solid #e2e7ef; }
+.interaction-composer ion-textarea { --background: #fff; --padding-start: 11px; --padding-end: 11px; border: 1px solid #e1e6ee; border-radius: 12px; }
+.interaction-composer ion-button { flex: 0 0 auto; }
+
+@media (max-width: 600px) {
+  .client-services-heading, .client-request-top { align-items: flex-start; flex-direction: column; }
+  .client-services-heading ion-button { margin: 0; }
+  .client-request-top time { align-self: flex-end; }
+}
+
+.technician-profile-section {
+  padding: 14px 0;
+  border-top: 1px solid #f1f5f9;
+}
+
+.technician-profile-section h3 {
+  margin: 0 0 7px;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 700;
+}

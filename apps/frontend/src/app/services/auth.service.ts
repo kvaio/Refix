@@ -16,6 +16,13 @@ export interface AuthResponse {
   user: AuthUser;
 }
 
+export interface RegisterTechnicianProfile {
+  profession: string;
+  yearsExperience: number;
+  certifications?: string;
+  bio: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -31,10 +38,23 @@ export class AuthService {
   }
 
   register(data: {
-    name: string;
+    firstNames: string;
+    paternalSurname: string;
+    maternalSurname: string;
+    birthDate: string;
+    sex: string;
     email: string;
     password: string;
     phone?: string;
+    role?: 'CLIENT' | 'TECHNICIAN';
+    street: string;
+    exteriorNumber: string;
+    interiorNumber?: string;
+    neighborhood: string;
+    municipality: string;
+    state: string;
+    postalCode?: string;
+    technicianProfile?: RegisterTechnicianProfile;
   }): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/register`, data)

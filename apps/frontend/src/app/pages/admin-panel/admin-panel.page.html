@@ -1,117 +1,234 @@
-<ion-content style="--background: #f8fafc;">
-  <div style="display: flex; min-height: 100vh;">
-
-    <!-- Sidebar Oscura de Administración -->
-    <div
-      style="width: 250px; background: #0f172a; color: white; padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between;">
+<ion-content class="admin-content">
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
       <div>
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 28px; padding-left: 8px;">
-          <ion-icon name="hardware-chip-outline" style="color: #a855f7; font-size: 24px;"></ion-icon>
-          <div>
-            <strong style="font-size: 16px; display: block;">ReFix</strong>
-            <span style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Panel
-              Admin</span>
-          </div>
+        <div class="admin-brand">
+          <ion-icon name="hardware-chip-outline"></ion-icon>
+          <div><strong>ReFix</strong><span>Administración</span></div>
         </div>
-
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-
-          <ion-button fill="solid" color="primary"
-            style="--border-radius: 10px; justify-content: flex-start; --padding-start: 12px; font-size: 13px;">
-            <ion-icon name="grid-outline" slot="start"></ion-icon> Dashboard General
-          </ion-button>
-
-          <ion-button fill="clear" color="light"
-            style="justify-content: flex-start; --padding-start: 12px; font-size: 13px;">
-            <ion-icon name="people-outline" slot="start"></ion-icon> Gestión de Usuarios
-          </ion-button>
-
-          <ion-button fill="clear" color="light"
-            style="justify-content: flex-start; --padding-start: 12px; font-size: 13px;">
-            <ion-icon name="build-outline" slot="start"></ion-icon> Aprobar Técnicos
-          </ion-button>
-
-          <ion-button fill="clear" color="light"
-            style="justify-content: flex-start; --padding-start: 12px; font-size: 13px;">
-            <ion-icon name="cash-outline" slot="start"></ion-icon> Transacciones
-          </ion-button>
-          
-        </div>
+        <div class="admin-nav-label">PANEL</div>
+        <div class="admin-nav-item active"><ion-icon name="people-outline"></ion-icon> Cuentas</div>
       </div>
-
-      <ion-button (click)="logout()" fill="clear" color="danger" style="justify-content: flex-start; font-size: 13px;">
-        <ion-icon name="log-out-outline" slot="start"></ion-icon>
-        Cerrar Sesión
+      <ion-button (click)="logout()" fill="clear" color="light" class="admin-logout">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon> Cerrar sesión
       </ion-button>
-    </div>
+    </aside>
 
-    <!-- Contenido Principal Administrativo -->
-    <div style="flex: 1; padding: 32px; overflow-y: auto;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;">
+    <main class="admin-main">
+      <header class="admin-header">
         <div>
-          <h2 style="margin: 0; font-weight: 800; color: #0f172a; font-size: 24px;">Resumen Administrativo</h2>
-          <span style="font-size: 12px; color: #64748b;">Monitoreo en tiempo real de la plataforma ReFix</span>
+          <p class="admin-eyebrow">Panel de control</p>
+          <h1>Administración de cuentas</h1>
+          <p class="admin-subtitle">Hola, {{ adminName }}. Aquí puedes revisar y gestionar las cuentas de ReFix.</p>
         </div>
-        <ion-badge color="primary" style="padding: 8px 12px; border-radius: 8px; font-size: 12px;">Sistema Operativo
-          100%</ion-badge>
-      </div>
+        <ion-button fill="outline" (click)="loadDashboard()" [disabled]="isLoading" aria-label="Actualizar cuentas">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon> Actualizar
+        </ion-button>
+      </header>
 
-      <!-- Métricas Globales -->
-      <ion-grid style="padding: 0; margin-bottom: 28px;">
-        <ion-row>
-          <ion-col size="3">
-            <div class="metric-card">
-              <span style="font-size: 12px; color: #64748b;">Usuarios Totales</span>
-              <h3 style="margin: 8px 0 4px 0; font-weight: 800; font-size: 24px; color: #0f172a;">15,420</h3>
-              <span style="font-size: 11px; color: #16a34a; font-weight: 600;">+18% este mes</span>
-            </div>
-          </ion-col>
-          <ion-col size="3">
-            <div class="metric-card">
-              <span style="font-size: 12px; color: #64748b;">Técnicos Verificados</span>
-              <h3 style="margin: 8px 0 4px 0; font-weight: 800; font-size: 24px; color: #0f172a;">2,400</h3>
-              <span style="font-size: 11px; color: #16a34a; font-weight: 600;">98% activos</span>
-            </div>
-          </ion-col>
-          <ion-col size="3">
-            <div class="metric-card">
-              <span style="font-size: 12px; color: #64748b;">Ingresos Plataforma</span>
-              <h3 style="margin: 8px 0 4px 0; font-weight: 800; font-size: 24px; color: #0f172a;">Q 128,500</h3>
-              <span style="font-size: 11px; color: #16a34a; font-weight: 600;">Comisión del 10%</span>
-            </div>
-          </ion-col>
-          <ion-col size="3">
-            <div class="metric-card">
-              <span style="font-size: 12px; color: #64748b;">Solicitudes Pendientes</span>
-              <h3 style="margin: 8px 0 4px 0; font-weight: 800; font-size: 24px; color: #0f172a;">14</h3>
-              <span style="font-size: 11px; color: #eab308; font-weight: 600;">Por revisión</span>
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+      <section class="metrics-grid" *ngIf="dashboard as data">
+        <article class="metric-card"><span>Cuentas</span><strong>{{ data.metrics.total }}</strong><small>Total registradas</small></article>
+        <article class="metric-card"><span>Clientes</span><strong>{{ data.metrics.clients }}</strong><small>Perfiles de cliente</small></article>
+        <article class="metric-card"><span>Técnicos</span><strong>{{ data.metrics.technicians }}</strong><small>Perfiles técnicos</small></article>
+        <article class="metric-card"><span>Administradores</span><strong>{{ data.metrics.admins }}</strong><small>Cuentas de administración</small></article>
+        <article class="metric-card"><span>Activas</span><strong class="metric-positive">{{ data.metrics.active }}</strong><small>Pueden acceder</small></article>
+        <article class="metric-card"><span>Suspendidas</span><strong class="metric-muted">{{ data.metrics.suspended }}</strong><small>Acceso bloqueado</small></article>
+      </section>
 
-      <!-- Tabla de Verificaciones Pendientes -->
-      <div class="metric-card">
-        <h3 style="margin: 0 0 16px 0; font-weight: 700; color: #0f172a;">Técnicos Pendientes de Aprobación</h3>
-        <ion-list style="padding: 0;">
-          <ion-item style="--padding-start: 0; --border-color: #f1f5f9;">
-            <ion-avatar slot="start">
-              <div
-                style="background: #a855f7; color: white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700;">
-                MP</div>
-            </ion-avatar>
-            <ion-label>
-              <h2 style="font-weight: 700;">Mario Paredes</h2>
-              <p>Técnico en Climatización y Refrigeración · Documentación cargada</p>
-            </ion-label>
-            <div slot="end" style="display: flex; gap: 8px;">
-              <ion-button color="success" size="small" style="--border-radius: 8px;">Aprobar</ion-button>
-              <ion-button color="medium" fill="outline" size="small" style="--border-radius: 8px;">Revisar</ion-button>
-            </div>
-          </ion-item>
-        </ion-list>
-      </div>
+      <section class="accounts-card">
+        <div class="accounts-heading">
+          <div><h2>Cuentas registradas</h2><p>Selecciona una cuenta para consultar y editar sus datos.</p></div>
+          <ion-button color="primary" (click)="openCreateForm()"><ion-icon name="person-add-outline" slot="start"></ion-icon>Nueva cuenta</ion-button>
+        </div>
+        <div class="account-filters">
+          <ion-searchbar
+            [(ngModel)]="searchTerm"
+            (ionInput)="loadDashboard()"
+            debounce="300"
+            placeholder="Buscar por nombre, correo o teléfono..."
+            aria-label="Buscar cuentas">
+          </ion-searchbar>
+          <ion-select [(ngModel)]="roleFilter" (ionChange)="loadDashboard()" interface="popover" aria-label="Filtrar por tipo de cuenta">
+            <ion-select-option value="ALL">Todos los roles</ion-select-option>
+            <ion-select-option value="CLIENT">Clientes</ion-select-option>
+            <ion-select-option value="TECHNICIAN">Técnicos</ion-select-option>
+            <ion-select-option value="ADMIN">Administradores</ion-select-option>
+          </ion-select>
+          <ion-select [(ngModel)]="statusFilter" (ionChange)="loadDashboard()" interface="popover" aria-label="Filtrar por estado">
+            <ion-select-option value="ALL">Todos los estados</ion-select-option>
+            <ion-select-option value="active">Activas</ion-select-option>
+            <ion-select-option value="suspended">Suspendidas</ion-select-option>
+          </ion-select>
+        </div>
 
-    </div>
+        <div class="admin-feedback error" *ngIf="errorMessage" role="alert">
+          <span>{{ errorMessage }}</span>
+          <ion-button fill="clear" size="small" (click)="loadDashboard()">Reintentar</ion-button>
+        </div>
+        <div class="admin-feedback" *ngIf="actionMessage" role="status">{{ actionMessage }}</div>
+        <div class="admin-loading" *ngIf="isLoading"><ion-spinner name="crescent"></ion-spinner><span>Cargando cuentas…</span></div>
+
+        <ng-container *ngIf="dashboard as data">
+          <ion-list class="accounts-list" *ngIf="!isLoading && !errorMessage && data.accounts.length > 0">
+            <ion-item button detail="true" *ngFor="let account of data.accounts" (click)="openAccount(account)">
+              <ion-avatar slot="start"><div class="account-avatar">{{ account.name.slice(0, 1).toUpperCase() }}</div></ion-avatar>
+              <ion-label>
+                <h3>{{ account.name }}</h3>
+                <p>{{ account.email }}<span *ngIf="account.phone"> · {{ account.phone }}</span></p>
+              </ion-label>
+              <ion-badge class="role-badge" color="light" slot="end">{{ formatRole(account.role) }}</ion-badge>
+              <ion-badge [color]="account.isActive ? 'success' : 'medium'" slot="end">{{ account.isActive ? 'Activa' : 'Suspendida' }}</ion-badge>
+              <ion-button
+                slot="end"
+                size="small"
+                [color]="account.isActive ? 'danger' : 'success'"
+                fill="outline"
+                [disabled]="busyAccountId === account.id || account.id === adminId"
+                (click)="$event.stopPropagation(); toggleAccount(account)">
+                {{ busyAccountId === account.id ? 'Guardando…' : account.isActive ? 'Suspender' : 'Activar' }}
+              </ion-button>
+            </ion-item>
+          </ion-list>
+          <div class="empty-state" *ngIf="!isLoading && !errorMessage && data.accounts.length === 0">
+            No hay cuentas que coincidan con estos filtros.
+          </div>
+        </ng-container>
+
+      </section>
+    </main>
   </div>
+
+  <ion-modal [isOpen]="!!selectedAccount" (didDismiss)="closeAccount()" class="admin-account-modal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Detalle de cuenta</ion-title>
+          <ion-buttons slot="end"><ion-button (click)="closeAccount()" aria-label="Cerrar"><ion-icon name="close-outline"></ion-icon></ion-button></ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding" *ngIf="selectedAccount as account">
+        <div class="account-detail-heading">
+          <ion-avatar><div class="account-avatar">{{ account.name.slice(0, 1).toUpperCase() }}</div></ion-avatar>
+          <div><h2>{{ account.name }}</h2><p>{{ formatRole(account.role) }} · {{ account.isActive ? 'Cuenta activa' : 'Cuenta suspendida' }}</p></div>
+        </div>
+        <section class="detail-section">
+          <h3>Contacto</h3>
+          <p><strong>Correo:</strong> {{ account.email }}</p>
+          <p><strong>Teléfono:</strong> {{ account.phone || 'Sin teléfono registrado' }}</p>
+        </section>
+        <section class="detail-section">
+          <h3>Datos personales</h3>
+          <p><strong>Nombre:</strong> {{ account.firstNames || account.name }}</p>
+          <p><strong>Apellido paterno:</strong> {{ account.paternalSurname || 'Sin dato' }}</p>
+          <p><strong>Apellido materno:</strong> {{ account.maternalSurname || 'Sin dato' }}</p>
+          <p><strong>Fecha de nacimiento:</strong> {{ account.birthDate ? (account.birthDate | date:'longDate') : 'Sin dato' }}</p>
+          <p><strong>Sexo:</strong> {{ account.sex || 'Sin dato' }}</p>
+        </section>
+        <section class="detail-section">
+          <h3>Domicilio</h3>
+          <p>{{ formatAddress(account) }}</p>
+        </section>
+        <section class="detail-section" *ngIf="account.technicianProfile as profile">
+          <h3>Perfil profesional</h3>
+          <p><strong>Profesión:</strong> {{ profile.profession || 'Sin dato' }}</p>
+          <p><strong>Experiencia:</strong> {{ profile.yearsExperience === null ? 'Sin dato' : profile.yearsExperience + ' años' }}</p>
+          <p><strong>Descripción:</strong> {{ profile.bio || 'Sin descripción' }}</p>
+          <p><strong>Certificaciones:</strong> {{ profile.certifications || 'Ninguna registrada' }}</p>
+          <p><strong>Puntuación:</strong> {{ profile.rating > 0 ? (profile.rating | number:'1.1-1') : 'Sin puntuaciones' }}</p>
+        </section>
+        <section class="detail-section"><h3>Registro</h3><p>{{ account.createdAt | date:'medium' }}</p></section>
+        <div class="account-detail-actions">
+          <ion-button fill="outline" (click)="openEditForm(account)"><ion-icon name="create-outline" slot="start"></ion-icon>Editar datos</ion-button>
+          <ion-button *ngIf="account.id !== adminId" [color]="account.isActive ? 'danger' : 'success'" (click)="toggleAccount(account)">
+            {{ account.isActive ? 'Suspender' : 'Reactivar' }}
+          </ion-button>
+          <ion-button *ngIf="account.canDelete && account.id !== adminId" color="danger" fill="clear" (click)="deleteAccount(account)">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>Eliminar permanentemente
+          </ion-button>
+          <ion-button
+            *ngIf="account.role !== 'ADMIN' && account._count.serviceRequests + account._count.assignedServices > 0"
+            color="danger"
+            fill="outline"
+            [disabled]="clearingRequestsAccountId === account.id"
+            (click)="clearAccountRequests(account)">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            {{ clearingRequestsAccountId === account.id ? 'Borrando pedidos…' : 'Borrar pedidos del perfil' }}
+          </ion-button>
+        </div>
+        <p class="delete-restriction" *ngIf="!account.canDelete">
+          Esta cuenta tiene solicitudes o historial asociado. Para conservar esos registros, puedes suspenderla en lugar de eliminarla.
+        </p>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="isFormOpen" (didDismiss)="closeForm()" class="admin-account-modal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ formMode === 'create' ? 'Crear cuenta' : 'Editar cuenta' }}</ion-title>
+          <ion-buttons slot="end"><ion-button (click)="closeForm()" aria-label="Cerrar"><ion-icon name="close-outline"></ion-icon></ion-button></ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <form #accountFormRef="ngForm" (ngSubmit)="saveAccountForm()">
+          <div class="form-section">
+            <h3>Cuenta</h3>
+            <ion-item fill="outline" *ngIf="formMode === 'create'">
+              <ion-label position="floating">Tipo de cuenta</ion-label>
+              <ion-select name="formRole" [(ngModel)]="accountForm.role" interface="popover">
+                <ion-select-option value="CLIENT">Cliente</ion-select-option>
+                <ion-select-option value="TECHNICIAN">Técnico</ion-select-option>
+              </ion-select>
+            </ion-item>
+            <p *ngIf="formMode === 'edit'" class="fixed-role">Tipo de cuenta: {{ accountForm.role === 'TECHNICIAN' ? 'Técnico' : selectedAccount?.role === 'ADMIN' ? 'Administrador' : 'Cliente' }}</p>
+            <div class="form-grid">
+              <ion-item fill="outline"><ion-label position="floating">Correo electrónico</ion-label><ion-input name="formEmail" [(ngModel)]="accountForm.email" type="email" required email maxlength="254"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">{{ formMode === 'create' ? 'Contraseña inicial' : 'Nueva contraseña (opcional)' }}</ion-label><ion-input name="formPassword" [(ngModel)]="accountForm.password" type="password" [required]="formMode === 'create'" [minlength]="formMode === 'create' || accountForm.password ? 8 : null" maxlength="72" autocomplete="new-password"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">Teléfono (opcional)</ion-label><ion-input name="formPhone" [(ngModel)]="accountForm.phone" type="tel" maxlength="30"></ion-input></ion-item>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Datos personales</h3>
+            <div class="form-grid">
+              <ion-item fill="outline"><ion-label position="floating">Nombre(s)</ion-label><ion-input name="formFirstNames" [(ngModel)]="accountForm.firstNames" [required]="formMode === 'create'" minlength="2" maxlength="80"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">Apellido paterno</ion-label><ion-input name="formPaternal" [(ngModel)]="accountForm.paternalSurname" [required]="formMode === 'create'" minlength="2" maxlength="60"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">Apellido materno</ion-label><ion-input name="formMaternal" [(ngModel)]="accountForm.maternalSurname" [required]="formMode === 'create'" minlength="2" maxlength="60"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">Fecha de nacimiento</ion-label><ion-input name="formBirthDate" [(ngModel)]="accountForm.birthDate" type="date" [max]="maxBirthDate" [required]="formMode === 'create'"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">Sexo</ion-label><ion-select name="formSex" [(ngModel)]="accountForm.sex" interface="popover" [required]="formMode === 'create'"><ion-select-option value="FEMENINO">Femenino</ion-select-option><ion-select-option value="MASCULINO">Masculino</ion-select-option><ion-select-option value="INTERSEXUAL">Intersexual</ion-select-option><ion-select-option value="PREFIERO_NO_DECIR">Prefiero no decir</ion-select-option></ion-select></ion-item>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Domicilio</h3>
+            <div class="form-grid">
+              <ion-item fill="outline"><ion-label position="floating">Calle</ion-label><ion-input name="formStreet" [(ngModel)]="accountForm.street" [required]="formMode === 'create'" minlength="2" maxlength="150"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">Número exterior</ion-label><ion-input name="formExterior" [(ngModel)]="accountForm.exteriorNumber" [required]="formMode === 'create'" maxlength="30"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">Número interior (opcional)</ion-label><ion-input name="formInterior" [(ngModel)]="accountForm.interiorNumber" maxlength="30"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">Colonia</ion-label><ion-input name="formNeighborhood" [(ngModel)]="accountForm.neighborhood" [required]="formMode === 'create'" minlength="2" maxlength="120"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">Municipio o alcaldía/delegación</ion-label><ion-input name="formMunicipality" [(ngModel)]="accountForm.municipality" [required]="formMode === 'create'" minlength="2" maxlength="120"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">Estado</ion-label><ion-input name="formState" [(ngModel)]="accountForm.state" [required]="formMode === 'create'" minlength="2" maxlength="120"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">Código postal (opcional)</ion-label><ion-input name="formPostalCode" [(ngModel)]="accountForm.postalCode" maxlength="12"></ion-input></ion-item>
+            </div>
+          </div>
+
+          <div class="form-section" *ngIf="accountForm.role === 'TECHNICIAN'">
+            <h3>Perfil profesional</h3>
+            <div class="form-grid">
+              <ion-item fill="outline"><ion-label position="floating">Profesión o especialidad</ion-label><ion-input name="formProfession" [(ngModel)]="accountForm.profession" [required]="formMode === 'create'" minlength="2" maxlength="120"></ion-input></ion-item>
+              <ion-item fill="outline"><ion-label position="floating">Años de experiencia</ion-label><ion-input name="formExperience" [(ngModel)]="accountForm.yearsExperience" type="number" min="0" max="80" [required]="formMode === 'create'"></ion-input></ion-item>
+              <ion-item fill="outline" class="form-grid-wide"><ion-label position="floating">Certificaciones (opcional)</ion-label><ion-textarea name="formCertifications" [(ngModel)]="accountForm.certifications" autoGrow="true" maxlength="4000"></ion-textarea></ion-item>
+              <ion-item fill="outline" class="form-grid-wide"><ion-label position="floating">Descripción profesional</ion-label><ion-textarea name="formBio" [(ngModel)]="accountForm.bio" [required]="formMode === 'create'" minlength="10" maxlength="2000" autoGrow="true"></ion-textarea></ion-item>
+            </div>
+          </div>
+
+          <ion-text color="danger" *ngIf="formError"><p role="alert">{{ formError }}</p></ion-text>
+          <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="accountFormRef.invalid || isSavingForm">
+            {{ isSavingForm ? 'Guardando…' : formMode === 'create' ? 'Crear cuenta' : 'Guardar cambios' }}
+          </ion-button>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

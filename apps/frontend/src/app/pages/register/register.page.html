@@ -1,7 +1,7 @@
-﻿<ion-content class="ion-padding">
+<ion-content class="ion-padding">
   <ion-grid class="full-height">
     <ion-row class="full-height ion-align-items-center ion-justify-content-center">
-      <ion-col size="12" size-md="6" size-lg="5">
+      <ion-col size="12" size-md="8" size-lg="7">
         <div class="form-container">
           <ion-button fill="clear" routerLink="/landing" size="small">
             <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
@@ -9,60 +9,123 @@
           </ion-button>
 
           <h2 class="ion-no-margin ion-margin-top">Crear cuenta en ReFix</h2>
-          <p class="ion-color-medium">
-            ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
-          </p>
+          <p class="ion-color-medium">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
 
           <form (ngSubmit)="onRegister()" #registerForm="ngForm">
             <ion-item fill="outline" class="ion-margin-top">
-              <ion-label position="floating">Nombre completo</ion-label>
-              <ion-input
-                name="name"
-                [(ngModel)]="name"
-                type="text"
-                autocomplete="name"
-                required
-                minlength="2"
-                maxlength="100">
-              </ion-input>
+              <ion-label position="floating">Tipo de cuenta</ion-label>
+              <ion-select name="role" [(ngModel)]="role" interface="popover">
+                <ion-select-option value="CLIENT">Cliente</ion-select-option>
+                <ion-select-option value="TECHNICIAN">Técnico</ion-select-option>
+              </ion-select>
             </ion-item>
 
-            <ion-item fill="outline" class="ion-margin-top">
-              <ion-label position="floating">Correo electrónico</ion-label>
-              <ion-input
-                name="email"
-                [(ngModel)]="email"
-                type="email"
-                autocomplete="email"
-                required
-                email
-                maxlength="254">
-              </ion-input>
-            </ion-item>
+            <section class="form-section">
+              <h3>Datos personales</h3>
+              <div class="form-grid">
+                <ion-item fill="outline">
+                  <ion-label position="floating">Nombre(s)</ion-label>
+                  <ion-input name="firstNames" [(ngModel)]="firstNames" autocomplete="given-name" required minlength="2" maxlength="80"></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Apellido paterno</ion-label>
+                  <ion-input name="paternalSurname" [(ngModel)]="paternalSurname" autocomplete="family-name" required minlength="2" maxlength="60"></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Apellido materno</ion-label>
+                  <ion-input name="maternalSurname" [(ngModel)]="maternalSurname" required minlength="2" maxlength="60"></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Fecha de nacimiento</ion-label>
+                  <ion-input name="birthDate" [(ngModel)]="birthDate" type="date" [max]="maxBirthDate" required></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Sexo</ion-label>
+                  <ion-select name="sex" [(ngModel)]="sex" interface="popover" required>
+                    <ion-select-option value="FEMENINO">Femenino</ion-select-option>
+                    <ion-select-option value="MASCULINO">Masculino</ion-select-option>
+                    <ion-select-option value="INTERSEXUAL">Intersexual</ion-select-option>
+                    <ion-select-option value="PREFIERO_NO_DECIR">Prefiero no decir</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </div>
+            </section>
 
-            <ion-item fill="outline" class="ion-margin-top">
-              <ion-label position="floating">Contraseña (mínimo 8 caracteres)</ion-label>
-              <ion-input
-                name="password"
-                [(ngModel)]="password"
-                type="password"
-                autocomplete="new-password"
-                required
-                minlength="8"
-                maxlength="72">
-              </ion-input>
-            </ion-item>
+            <section class="form-section">
+              <h3>Datos de acceso y contacto</h3>
+              <div class="form-grid">
+                <ion-item fill="outline">
+                  <ion-label position="floating">Correo electrónico</ion-label>
+                  <ion-input name="email" [(ngModel)]="email" type="email" autocomplete="email" required email maxlength="254"></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Contraseña (mínimo 8 caracteres)</ion-label>
+                  <ion-input name="password" [(ngModel)]="password" type="password" autocomplete="new-password" required minlength="8" maxlength="72"></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Teléfono (opcional)</ion-label>
+                  <ion-input name="phone" [(ngModel)]="phone" type="tel" autocomplete="tel" maxlength="30"></ion-input>
+                </ion-item>
+              </div>
+            </section>
 
-            <ion-item fill="outline" class="ion-margin-top">
-              <ion-label position="floating">Teléfono (opcional)</ion-label>
-              <ion-input
-                name="phone"
-                [(ngModel)]="phone"
-                type="tel"
-                autocomplete="tel"
-                maxlength="30">
-              </ion-input>
-            </ion-item>
+            <section class="form-section">
+              <h3>Datos de ubicación</h3>
+              <div class="form-grid">
+                <ion-item fill="outline">
+                  <ion-label position="floating">Calle</ion-label>
+                  <ion-input name="street" [(ngModel)]="street" autocomplete="address-line1" required minlength="2" maxlength="150"></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Número exterior</ion-label>
+                  <ion-input name="exteriorNumber" [(ngModel)]="exteriorNumber" required maxlength="30"></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Número interior (opcional)</ion-label>
+                  <ion-input name="interiorNumber" [(ngModel)]="interiorNumber" maxlength="30"></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Colonia</ion-label>
+                  <ion-input name="neighborhood" [(ngModel)]="neighborhood" autocomplete="address-level3" required minlength="2" maxlength="120"></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Municipio o alcaldía/delegación</ion-label>
+                  <ion-input name="municipality" [(ngModel)]="municipality" autocomplete="address-level2" required minlength="2" maxlength="120"></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Estado</ion-label>
+                  <ion-input name="state" [(ngModel)]="state" autocomplete="address-level1" required minlength="2" maxlength="120"></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Código postal (opcional)</ion-label>
+                  <ion-input name="postalCode" [(ngModel)]="postalCode" autocomplete="postal-code" maxlength="12"></ion-input>
+                </ion-item>
+              </div>
+            </section>
+
+            <section class="form-section technician-fields" *ngIf="role === 'TECHNICIAN'">
+              <h3>Datos profesionales</h3>
+              <p>Estos datos solo se solicitan para crear un perfil técnico. La validación de documentos se agregará más adelante.</p>
+              <div class="form-grid">
+                <ion-item fill="outline">
+                  <ion-label position="floating">Profesión o especialidad</ion-label>
+                  <ion-input name="profession" [(ngModel)]="profession" required minlength="2" maxlength="120"></ion-input>
+                </ion-item>
+                <ion-item fill="outline">
+                  <ion-label position="floating">Años de experiencia</ion-label>
+                  <ion-input name="yearsExperience" [(ngModel)]="yearsExperience" type="number" min="0" max="80" required></ion-input>
+                </ion-item>
+                <ion-item fill="outline" class="form-grid-wide">
+                  <ion-label position="floating">Certificaciones o acreditaciones (opcional)</ion-label>
+                  <ion-textarea name="certifications" [(ngModel)]="certifications" autoGrow="true" maxlength="4000"></ion-textarea>
+                </ion-item>
+                <ion-item fill="outline" class="form-grid-wide">
+                  <ion-label position="floating">Descripción profesional</ion-label>
+                  <ion-textarea name="technicianBio" [(ngModel)]="technicianBio" autoGrow="true" required minlength="10" maxlength="2000"></ion-textarea>
+                </ion-item>
+              </div>
+
+            </section>
 
             <ion-text color="danger" *ngIf="errorMessage">
               <p role="alert" class="ion-padding-top">{{ errorMessage }}</p>
@@ -73,8 +136,8 @@
               color="primary"
               class="ion-margin-top"
               type="submit"
-              [disabled]="registerForm.invalid || isLoading">
-              {{ isLoading ? 'Creando cuenta...' : 'Crear cuenta →' }}
+              [disabled]="registerForm.invalid || isLoading || birthDate > maxBirthDate">
+              {{ isLoading ? 'Creando cuenta...' : role === 'TECHNICIAN' ? 'Crear perfil técnico →' : 'Crear cuenta →' }}
             </ion-button>
           </form>
         </div>

@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { vi } from 'vitest';
+import { PrismaService } from '../src/prisma/prisma.service';
 
 import configuration from '../src/config/configuration';
 import { AuthModule } from '../src/modules/auth/auth.module';
@@ -46,6 +47,16 @@ describe('ServiceRequests API (e2e)', () => {
     role: 'ADMIN',
   };
 
+  const users = [client, technician, admin];
+
+  const prismaMock = {
+    user: {
+      findUnique: vi.fn(({ where }: { where: { id: string } }) =>
+        users.find((user) => user.id === where.id) ?? null,
+      ),
+    },
+  };
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -63,8 +74,11 @@ describe('ServiceRequests API (e2e)', () => {
         },
       ],
     })
+
       .overrideProvider(ServiceRequestsService)
       .useValue(serviceMock)
+      .overrideProvider(PrismaService)
+      .useValue(prismaMock)
       .compile();
 
     app = moduleFixture.createNestApplication();

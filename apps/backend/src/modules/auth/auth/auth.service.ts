@@ -1,4 +1,5 @@
 ﻿import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -18,6 +19,32 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
     const email = dto.email.trim().toLowerCase();
+    const role = dto.role ?? 'CLIENT';
+    const fullName = [dto.firstNames, dto.paternalSurname, dto.maternalSurname]
+      .map((part) => part.trim())
+      .join(' ');
+    const technicianAddress = [
+      `${dto.street.trim()} ${dto.exteriorNumber.trim()}`,
+      dto.interiorNumber?.trim(),
+      dto.neighborhood.trim(),
+      dto.municipality.trim(),
+      dto.state.trim(),
+      dto.postalCode?.trim(),
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    if (role === 'TECHNICIAN' && !dto.technicianProfile) {
+      throw new BadRequestException(
+        'Para crear una cuenta de técnico debes completar tu ubicación y perfil.',
+      );
+    }
+
+    if (role === 'CLIENT' && dto.technicianProfile) {
+      throw new BadRequestException(
+        'El perfil técnico solo se puede crear para cuentas de técnico.',
+      );
+    }
 
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
@@ -31,11 +58,36 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        name: dto.name.trim(),
+        name: fullName,
+        firstNames: dto.firstNames.trim(),
+        paternalSurname: dto.paternalSurname.trim(),
+        maternalSurname: dto.maternalSurname.trim(),
+        birthDate: new Date(`${dto.birthDate}T00:00:00.000Z`),
+        sex: dto.sex,
+        street: dto.street.trim(),
+        exteriorNumber: dto.exteriorNumber.trim(),
+        interiorNumber: dto.interiorNumber?.trim() || null,
+        neighborhood: dto.neighborhood.trim(),
+        municipality: dto.municipality.trim(),
+        state: dto.state.trim(),
+        postalCode: dto.postalCode?.trim() || null,
         email,
         password: passwordHash,
         phone: dto.phone?.trim() || null,
-        role: 'CLIENT',
+        role,
+        ...(role === 'TECHNICIAN' && dto.technicianProfile
+          ? {
+              technicianProfile: {
+                create: {
+                  bio: dto.technicianProfile.bio.trim(),
+                  profession: dto.technicianProfile.profession.trim(),
+                  yearsExperience: dto.technicianProfile.yearsExperience,
+                  certifications: dto.technicianProfile.certifications?.trim() || null,
+                  address: technicianAddress,
+                },
+              },
+            }
+          : {}),
       },
       select: {
         id: true,
@@ -64,6 +116,10 @@ export class AuthService {
 
     if (!user || !(await compare(dto.password, user.password))) {
       throw new UnauthorizedException('Correo o contraseña incorrectos');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Esta cuenta está suspendida. Contacta al administrador.');
     }
 
     const access_token = await this.jwtService.signAsync({

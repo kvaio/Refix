@@ -1,9 +1,16 @@
 import {
   Controller,
+  Body,
   Get,
   Param,
+  Patch,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles/roles.guard';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -17,6 +24,11 @@ import {
 
 import { NearbyTechniciansDto } from './dto/nearby-technicians.dto';
 import { TechniciansService } from './technicians.service';
+import { UpdateTechnicianProfileDto } from './dto/update-technician-profile.dto';
+
+interface AuthenticatedTechnicianRequest extends Request {
+  user: { id: string };
+}
 
 @ApiTags('Technicians')
 @ApiBearerAuth()
@@ -25,6 +37,33 @@ export class TechniciansController {
   constructor(
     private readonly techniciansService: TechniciansService,
   ) {}
+
+  @Get('me')
+  @Roles('TECHNICIAN')
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Obtener el perfil del técnico autenticado' })
+  findMyProfile(@Req() req: AuthenticatedTechnicianRequest) {
+    return this.techniciansService.findMyProfile(req.user.id);
+  }
+
+  @Patch('me')
+  @Roles('TECHNICIAN')
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Actualizar el perfil profesional del técnico autenticado' })
+  updateMyProfile(
+    @Body() dto: UpdateTechnicianProfileDto,
+    @Req() req: AuthenticatedTechnicianRequest,
+  ) {
+    return this.techniciansService.updateMyProfile(req.user.id, dto);
+  }
+
+  @Get('me/reviews')
+  @Roles('TECHNICIAN')
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Consultar las reseñas del técnico autenticado' })
+  findMyReviews(@Req() req: AuthenticatedTechnicianRequest) {
+    return this.techniciansService.findMyReviews(req.user.id);
+  }
 
   @Get()
   @ApiOperation({

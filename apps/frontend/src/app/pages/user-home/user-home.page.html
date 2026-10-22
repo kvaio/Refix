@@ -19,7 +19,7 @@
             style="background: #6c2bd9; color: white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">
             JR</div>
         </ion-avatar>
-        <span style="font-size: 13px; font-weight: 600; color: #0f172a;">Juan Rodríguez</span>
+        <span style="font-size: 13px; font-weight: 600; color: #0f172a;">{{ userName }}</span>
       </div>
 
       <ion-button (click)="logout()" fill="outline" color="danger" style="--border-radius: 10px; font-weight: 600;">
@@ -33,6 +33,34 @@
 
 <ion-content class="ion-padding" style="--background: #f8fafc;">
 
+  <section class="client-services metric-card" aria-labelledby="client-services-title">
+    <div class="client-services-heading">
+      <div><h2 id="client-services-title">Mis solicitudes</h2><p>Solicita una reparación y sigue el avance con tu técnico.</p></div>
+      <ion-button (click)="openRequestForm()"><ion-icon name="add-outline" slot="start"></ion-icon>Nueva solicitud</ion-button>
+    </div>
+    <div class="service-notice service-notice-success" *ngIf="requestSuccess" role="status">{{ requestSuccess }}</div>
+    <div class="service-notice service-notice-error" *ngIf="requestsError" role="alert">{{ requestsError }} <ion-button fill="clear" size="small" (click)="loadClientRequests()">Reintentar</ion-button></div>
+    <div class="service-loading" *ngIf="requestsLoading"><ion-spinner name="crescent"></ion-spinner><span>Cargando tus solicitudes…</span></div>
+    <div class="service-empty" *ngIf="!requestsLoading && !requestsError && clientRequests.length === 0">Todavía no tienes solicitudes. Puedes crear una o iniciarla desde el perfil de un técnico.</div>
+    <div class="client-request-list" *ngIf="!requestsLoading && clientRequests.length > 0">
+      <article class="client-request-card" *ngFor="let request of clientRequests">
+        <div class="client-request-top"><div><span class="service-status" [attr.data-status]="request.status">{{ requestStatusLabel(request.status) }}</span><h3>{{ request.title }}</h3></div><time>{{ request.createdAt | date:'d MMM y' }}</time></div>
+        <div class="client-request-details"><span>{{ request.deviceType }}</span><span *ngIf="request.serviceAddress"><ion-icon name="location-outline"></ion-icon>{{ request.serviceAddress }}</span></div>
+        <div class="assigned-technician" *ngIf="request.technician as technician"><ion-icon name="construct-outline"></ion-icon><span><strong>{{ technician.name }}</strong><small>{{ technician.technicianProfile?.profession || 'Técnico asignado' }}</small></span></div>
+        <div class="client-request-actions">
+          <ion-button fill="outline" size="small" (click)="toggleRequestHistory(request)" [disabled]="historyLoadingId === request.id"><ion-spinner *ngIf="historyLoadingId === request.id" name="crescent" slot="start"></ion-spinner><ion-icon *ngIf="historyLoadingId !== request.id" name="time-outline" slot="start"></ion-icon>Historial</ion-button>
+          <ion-button fill="outline" size="small" *ngIf="request.technicianId && request.status !== 'CANCELADO'" (click)="openConversation(request)"><ion-icon name="chatbubble-ellipses-outline" slot="start"></ion-icon>Mensajes</ion-button>
+          <ion-button fill="outline" size="small" color="success" *ngIf="canReviewRequest(request)" (click)="openReview(request)"><ion-icon name="star-outline" slot="start"></ion-icon>Dejar reseña</ion-button>
+          <span class="review-saved" *ngIf="request.review">Tu reseña: {{ request.review.rating }}/5 ★</span>
+          <ion-button fill="clear" size="small" color="danger" *ngIf="request.status === 'SOLICITADO'" (click)="cancelClientRequest(request)" [disabled]="busyRequestId === request.id">{{ busyRequestId === request.id ? 'Cancelando…' : 'Cancelar solicitud' }}</ion-button>
+        </div>
+        <div class="request-history" *ngIf="requestHistory[request.id] as history">
+          <div class="history-entry" *ngFor="let entry of history"><span class="history-dot"></span><strong>{{ requestStatusLabel(entry.newStatus) }}</strong><time>{{ entry.createdAt | date:'d MMM y, h:mm a' }}</time></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <!-- Buscador y ChatBot de Usuario -->
   <ion-grid style="padding: 0; margin-bottom: 24px;">
     <ion-row>
@@ -42,43 +70,53 @@
           <p style="margin: 0 0 16px 0; font-size: 13px; color: #64748b;">Encuentra rápidamente el servicio o técnico
             que necesitas</p>
 
-          <ion-searchbar placeholder="¿Qué servicio necesitas? Ej: Reparación de laptop, plomería..."
+          <ion-searchbar
+            [(ngModel)]="technicianQuery"
+            placeholder="Buscar por nombre, profesión o descripción..."
             style="--border-radius: 12px; padding: 0; margin-bottom: 12px;"></ion-searchbar>
 
           <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
-            <ion-chip outline color="primary"><ion-label>⭐ Mejor valorados</ion-label></ion-chip>
-            <ion-chip outline color="medium"><ion-label>📍 Más cercanos</ion-label></ion-chip>
-            <ion-chip outline color="medium"><ion-label>💰 Menor precio</ion-label></ion-chip>
-            <ion-chip outline color="medium"><ion-label>⚡ Disponible ahora</ion-label></ion-chip>
+            <ion-chip button outline [color]="sortByRating ? 'primary' : 'medium'"
+              (click)="sortByRating = !sortByRating">
+              <ion-label>⭐ Mejor valorados</ion-label>
+            </ion-chip>
+            <ion-chip button outline [color]="showAvailableOnly ? 'primary' : 'medium'"
+              (click)="showAvailableOnly = !showAvailableOnly">
+              <ion-label>⚡ Disponibles ahora</ion-label>
+            </ion-chip>
           </div>
 
-          <ion-list style="padding: 0;">
-            <ion-item style="--padding-start: 0; --border-color: #f1f5f9;">
+          <div class="technicians-loading" *ngIf="loadingTechnicians">
+            <ion-spinner name="crescent"></ion-spinner>
+            <span>Cargando perfiles de técnicos…</span>
+          </div>
+          <div class="technicians-error" *ngIf="technicianError" role="alert">
+            <span>{{ technicianError }}</span>
+            <ion-button fill="clear" size="small" (click)="loadTechnicians()">Reintentar</ion-button>
+          </div>
+          <div class="technicians-empty" *ngIf="!loadingTechnicians && !technicianError && technicians.length === 0">
+            Aún no hay perfiles de técnicos registrados.
+          </div>
+          <div class="technicians-empty" *ngIf="!loadingTechnicians && !technicianError && technicians.length > 0 && filteredTechnicians.length === 0">
+            No hay técnicos que coincidan con la búsqueda.
+          </div>
+          <ion-list style="padding: 0;" *ngIf="!loadingTechnicians && !technicianError && filteredTechnicians.length > 0">
+            <ion-item *ngFor="let technician of filteredTechnicians"
+              button detail="true"
+              (click)="openTechnicianProfile(technician)"
+              [attr.aria-label]="'Ver perfil de ' + technician.name"
+              style="--padding-start: 0; --border-color: #f1f5f9;">
               <ion-avatar slot="start">
-                <div
-                  style="background: #6c2bd9; color: white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700;">
-                  Ra</div>
+                <div class="technician-avatar">{{ getInitials(technician.name) }}</div>
               </ion-avatar>
               <ion-label>
-                <h2 style="font-weight: 700; font-size: 14px;">Ing. Ramírez</h2>
-                <p style="font-size: 12px;">Especialista en Laptops · 1.2 km · Q 200–400</p>
+                <h2 style="font-weight: 700; font-size: 14px;">{{ technician.name }}</h2>
+                <p style="font-size: 12px;">{{ technician.profession || 'Técnico' }}</p>
               </ion-label>
-              <ion-badge color="warning" slot="end" style="margin-right: 8px;">★ 4.9</ion-badge>
-              <ion-button color="primary" slot="end" size="small" style="--border-radius: 8px;">Contactar</ion-button>
-            </ion-item>
-
-            <ion-item style="--padding-start: 0; --border-color: #f1f5f9;">
-              <ion-avatar slot="start">
-                <div
-                  style="background: #6c2bd9; color: white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700;">
-                  Ga</div>
-              </ion-avatar>
-              <ion-label>
-                <h2 style="font-weight: 700; font-size: 14px;">Téc. García</h2>
-                <p style="font-size: 12px;">Electricidad & Redes · 2.1 km · Q 150–300</p>
-              </ion-label>
-              <ion-badge color="warning" slot="end" style="margin-right: 8px;">★ 4.8</ion-badge>
-              <ion-button color="primary" slot="end" size="small" style="--border-radius: 8px;">Contactar</ion-button>
+              <ion-badge *ngIf="technician.rating > 0" color="warning" slot="end">
+                ★ {{ technician.rating | number:'1.1-1' }}
+              </ion-badge>
+              <ion-badge *ngIf="technician.rating <= 0" color="medium" slot="end">Sin puntuaciones</ion-badge>
             </ion-item>
           </ion-list>
         </div>
@@ -120,25 +158,149 @@
     </ion-row>
   </ion-grid>
 
+  <ion-modal [isOpen]="!!selectedTechnician" (didDismiss)="closeTechnicianProfile()" class="technician-profile-modal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Perfil del técnico</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeTechnicianProfile()" aria-label="Cerrar perfil">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding technician-profile-content" *ngIf="selectedTechnician as technician">
+        <div class="technician-profile-heading">
+          <ion-avatar>
+            <div class="technician-avatar">{{ getInitials(technician.name) }}</div>
+          </ion-avatar>
+          <div>
+            <h2>{{ technician.name }}</h2>
+            <p>{{ technician.profession || 'Técnico' }}</p>
+          </div>
+        </div>
+
+        <div class="technician-profile-rating">
+          <span *ngIf="technician.rating > 0">★ {{ technician.rating | number:'1.1-1' }} de puntuación</span>
+          <span *ngIf="technician.rating <= 0">Aún no tiene puntuaciones</span>
+          <ion-badge [color]="technician.available ? 'success' : 'medium'">
+            {{ technician.available ? 'Disponible' : 'Ocupado' }}
+          </ion-badge>
+        </div>
+
+        <section class="technician-profile-section">
+          <h3>Sobre el técnico</h3>
+          <p>{{ technician.bio || 'Este técnico aún no agregó una descripción.' }}</p>
+        </section>
+        <section class="technician-profile-section">
+          <h3>Experiencia</h3>
+          <p>{{ technician.yearsExperience === null ? 'Sin información de experiencia' : technician.yearsExperience + ' años de experiencia' }}</p>
+        </section>
+        <section class="technician-profile-section" *ngIf="technician.certifications">
+          <h3>Certificaciones y acreditaciones</h3>
+          <p>{{ technician.certifications }}</p>
+        </section>
+        <ion-button expand="block" class="request-technician-button" *ngIf="technician.available" (click)="openRequestForm(technician)">
+          <ion-icon name="construct-outline" slot="start"></ion-icon>Solicitar servicio con {{ technician.name }}
+        </ion-button>
+        <p class="technician-unavailable-note" *ngIf="!technician.available">Este técnico no está disponible para nuevas solicitudes en este momento.</p>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="isRequestFormOpen" (didDismiss)="closeRequestForm()">
+    <ng-template>
+      <ion-header><ion-toolbar><ion-title>{{ selectedRequestTechnicianId ? 'Solicitar a un técnico' : 'Nueva solicitud' }}</ion-title><ion-buttons slot="end"><ion-button (click)="closeRequestForm()" aria-label="Cerrar formulario"><ion-icon name="close-outline"></ion-icon></ion-button></ion-buttons></ion-toolbar></ion-header>
+      <ion-content class="ion-padding interaction-modal-content">
+        <p *ngIf="selectedRequestTechnicianId" class="selected-tech-note">Tu solicitud se enviará a <strong>{{ selectedRequestTechnicianName }}</strong>.</p>
+        <p *ngIf="!selectedRequestTechnicianId" class="selected-tech-note">Tu solicitud aparecerá para los técnicos disponibles.</p>
+        <form #requestForm="ngForm" (ngSubmit)="createClientRequest()">
+          <ion-item fill="outline"><ion-label position="floating">Título del problema</ion-label><ion-input name="requestTitle" [(ngModel)]="requestDraft.title" required minlength="5" maxlength="120"></ion-input></ion-item>
+          <ion-item fill="outline" class="ion-margin-top"><ion-label position="floating">Tipo de dispositivo</ion-label><ion-input name="deviceType" [(ngModel)]="requestDraft.deviceType" required minlength="2" maxlength="50" placeholder="Laptop, teléfono, consola…"></ion-input></ion-item>
+          <ion-item fill="outline" class="ion-margin-top"><ion-label position="floating">Describe el problema</ion-label><ion-textarea name="requestDescription" [(ngModel)]="requestDraft.description" required minlength="10" maxlength="2000" autoGrow="true"></ion-textarea></ion-item>
+          <ion-item fill="outline" class="ion-margin-top"><ion-label position="floating">Domicilio del servicio (opcional)</ion-label><ion-textarea name="serviceAddress" [(ngModel)]="requestDraft.serviceAddress" maxlength="500" autoGrow="true"></ion-textarea></ion-item>
+          <p class="address-help">Si lo dejas vacío, usaremos el domicilio de tu perfil.</p>
+          <ion-text color="danger" *ngIf="requestError"><p role="alert">{{ requestError }}</p></ion-text>
+          <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="requestForm.invalid || isCreatingRequest"><ion-spinner *ngIf="isCreatingRequest" name="crescent" slot="start"></ion-spinner>{{ isCreatingRequest ? 'Enviando…' : 'Enviar solicitud' }}</ion-button>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="!!reviewRequest" (didDismiss)="closeReview()">
+    <ng-template>
+      <ion-header><ion-toolbar><ion-title>Califica el servicio</ion-title><ion-buttons slot="end"><ion-button (click)="closeReview()" aria-label="Cerrar reseña"><ion-icon name="close-outline"></ion-icon></ion-button></ion-buttons></ion-toolbar></ion-header>
+      <ion-content class="ion-padding interaction-modal-content">
+        <p>¿Cómo fue tu experiencia con <strong>{{ reviewRequest?.technician?.name }}</strong>?</p>
+        <div class="rating-picker" role="group" aria-label="Calificación de una a cinco estrellas">
+          <button type="button" *ngFor="let star of [1,2,3,4,5]" [class.active]="star <= reviewRating" (click)="reviewRating = star" [attr.aria-label]="star + ' estrellas'">★</button>
+        </div>
+        <ion-item fill="outline" class="ion-margin-top"><ion-label position="floating">Comentario (opcional)</ion-label><ion-textarea [(ngModel)]="reviewComment" maxlength="2000" autoGrow="true"></ion-textarea></ion-item>
+        <ion-text color="danger" *ngIf="reviewError"><p role="alert">{{ reviewError }}</p></ion-text>
+        <ion-button expand="block" class="ion-margin-top" (click)="saveReview()" [disabled]="isSavingReview"><ion-spinner *ngIf="isSavingReview" name="crescent" slot="start"></ion-spinner>{{ isSavingReview ? 'Guardando…' : 'Enviar reseña' }}</ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="!!chatRequest" (didDismiss)="closeConversation()">
+    <ng-template>
+      <ion-header><ion-toolbar><ion-title>Conversación con {{ chatRequest?.technician?.name }}</ion-title><ion-buttons slot="end"><ion-button (click)="closeConversation()" aria-label="Cerrar conversación"><ion-icon name="close-outline"></ion-icon></ion-button></ion-buttons></ion-toolbar></ion-header>
+      <ion-content class="ion-padding interaction-modal-content">
+        <p class="chat-request-title"><strong>{{ chatRequest?.title }}</strong> · {{ chatRequest?.deviceType }}</p>
+        <div class="interaction-error" *ngIf="chatError" role="alert">{{ chatError }} <ion-button fill="clear" size="small" (click)="refreshConversation()">Reintentar</ion-button></div>
+        <div class="interaction-loading" *ngIf="chatLoading"><ion-spinner name="crescent"></ion-spinner><span>Cargando mensajes…</span></div>
+        <div class="interaction-empty" *ngIf="!chatLoading && chatMessages.length === 0">Aún no hay mensajes. Escribe para iniciar la conversación.</div>
+        <div class="interaction-messages" aria-live="polite"><div class="interaction-message" *ngFor="let message of chatMessages" [class.own-message]="isOwnMessage(message)"><small>{{ message.sender.name }}</small><p>{{ message.body }}</p><time>{{ message.createdAt | date:'d MMM, h:mm a' }}</time></div></div>
+        <form class="interaction-composer" (ngSubmit)="sendMessage()"><ion-textarea name="messageDraft" [(ngModel)]="messageDraft" placeholder="Escribe un mensaje…" autoGrow="true" maxlength="2000" required></ion-textarea><ion-button type="submit" [disabled]="!messageDraft.trim() || isSendingMessage"><ion-spinner *ngIf="isSendingMessage" name="crescent"></ion-spinner><ion-icon *ngIf="!isSendingMessage" name="send-outline"></ion-icon></ion-button></form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
   <!-- Mapa de Técnicos Cercanos -->
   <div class="metric-card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
       <div>
         <h3 style="margin: 0; font-weight: 700; color: #0f172a;">Mapa de Técnicos</h3>
-        <p style="margin: 2px 0 0 0; font-size: 12px; color: #16a34a; font-weight: 600;">🟢 6 técnicos disponibles cerca
-          de tu ubicación</p>
+        <p style="margin: 2px 0 0 0; font-size: 12px; color: #16a34a; font-weight: 600;">{{ mapStatus }}</p>
       </div>
       <div style="display: flex; gap: 8px;">
-        <ion-button fill="outline" color="medium" size="small" style="--border-radius: 8px;">📍 Mi
-          ubicación</ion-button>
+        <ion-button fill="outline" color="medium" size="small" style="--border-radius: 8px;" (click)="locateOnMap()" [disabled]="isLocating">
+          <ion-spinner *ngIf="isLocating" name="crescent" slot="start"></ion-spinner>
+          <ion-icon *ngIf="!isLocating" name="locate-outline" slot="start"></ion-icon>
+          {{ isLocating ? 'Buscando…' : 'Mi ubicación' }}
+        </ion-button>
         <ion-button color="primary" size="small" style="--border-radius: 8px;">🔍 Buscar en área</ion-button>
       </div>
     </div>
 
-    <div
-      style="background: #e0f2fe; height: 220px; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; border: 1px solid #bae6fd;">
-      <span style="color: #0284c7; font-weight: 600; font-size: 14px;">🗺️ Vista Interactiva del Mapa de
-        Cobertura</span>
+    <div class="coverage-map" role="region" aria-label="Mapa de cobertura">
+      <div class="coverage-map-tiles" [style.left]="'calc(50% - ' + mapShiftX + 'px)'" [style.top]="'calc(50% - ' + mapShiftY + 'px)'">
+        <img
+          *ngFor="let tile of mapTiles"
+          class="coverage-map-tile"
+          [src]="tile.url"
+          [style.left.px]="tile.left"
+          [style.top.px]="tile.top"
+          (load)="onTileSettled(tile.renderId, false)"
+          (error)="onTileSettled(tile.renderId, true)"
+          alt=""
+          aria-hidden="true"
+          referrerpolicy="strict-origin-when-cross-origin">
+      </div>
+      <div class="coverage-map-user-marker" *ngIf="hasUserLocation" aria-label="Tu ubicación">
+        <span></span>
+      </div>
+      <div class="coverage-map-loading" *ngIf="mapLoading" aria-live="polite">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span>Cargando mapa…</span>
+      </div>
+      <div class="coverage-map-message" *ngIf="mapMessage" role="status">
+        <span>{{ mapMessage }}</span>
+        <ion-button fill="clear" size="small" (click)="locateOnMap()">Reintentar ubicación</ion-button>
+        <a *ngIf="mapExternalUrl" [href]="mapExternalUrl" target="_blank" rel="noopener noreferrer">Abrir en OpenStreetMap</a>
+      </div>
+      <a class="coverage-map-attribution" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a>
     </div>
   </div>
 
